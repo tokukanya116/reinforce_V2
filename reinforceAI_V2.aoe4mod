@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Mod xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/Essence.Editor.Modding">
+	<DataGenericPath>assets</DataGenericPath>
+	<DataIntermediatePath>cache</DataIntermediatePath>
+	<ID>a4536250-dfa6-4a42-a9fa-6b37d3b36014</ID>
+	<LocDBPath>locdb\reinforceAI_V2.locdb</LocDBPath>
+	<Type>Extension</Type>
+</Mod>
