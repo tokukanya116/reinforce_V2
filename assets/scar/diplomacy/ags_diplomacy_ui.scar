@@ -227,6 +227,7 @@ function Diplomacy_CreateUI()
     </Button>
 	
 	<!-- Diplomacy panel -->
+  <!-- 这里就是外交弹窗的布局 -->
 	<Grid Grid.Row="1"
 		  Panel.ZIndex="1"
 		  Visibility="{Binding [is_ui_expanded], Converter={StaticResource BoolToVis}}">
@@ -241,21 +242,26 @@ function Diplomacy_CreateUI()
 						<RowDefinition Height="Auto" />
 						<RowDefinition Height="Auto" />
 					</Grid.RowDefinitions>
+          
+           <!-- 头部标签 -->
 					<Grid Grid.Row="0" Margin="0,0,0,3">
-	                    <Grid.ColumnDefinitions>
-	                        <ColumnDefinition MaxWidth="315" />
-	                        <ColumnDefinition Width="150" />
-	                        <ColumnDefinition Width="200" />
-	                        <ColumnDefinition Width="200" />
-	                    </Grid.ColumnDefinitions>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition MaxWidth="315" />
+              <ColumnDefinition Width="150" />  
+              <ColumnDefinition Width="200" /> 
+              <ColumnDefinition Width="200" />
+              <ColumnDefinition Width="200" />
+            </Grid.ColumnDefinitions>
 						
 						<!--  Header labels  -->
+            <!-- 最顶上的标签 -->
 	                    <esControls:Marquee Grid.Row="0" Grid.Column="0">
 							<!-- "PLAYER" -->
 	                        <TextBlock Style="{StaticResource HUDPrimaryColorGradientVerticalSubtitleTextBlock14ptStyle}"
 	                                   Text="{esUtility:LocString $11164878}" /> 
 	                    </esControls:Marquee>
 	
+            
 	                    <Grid Grid.Row="0" Grid.Column="1">
 	                        <Grid.ColumnDefinitions>
 	                            <ColumnDefinition Width="*" />
@@ -304,20 +310,45 @@ function Diplomacy_CreateUI()
 	                                       Text="{Binding [headerRelations]}" />
 	                        </esControls:Marquee>
 	                    </Grid>
+                      
+                       <Grid Grid.Row="0" Grid.Column="4">
+                          <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="*" />
+                              <ColumnDefinition Width="Auto" />
+                              <ColumnDefinition Width="*" />
+                          </Grid.ColumnDefinitions>
+  
+                          <esControls:Marquee Grid.Column="1"
+                                                        MarqueeType="Alternate" Speed="60">
+                <!-- "单位赠送" -->
+                              <TextBlock Margin="4,0" HorizontalAlignment="Center"
+                                         Style="{StaticResource HUDPrimaryColorGradientVerticalSubtitleTextBlock14ptStyle}"
+                                         Text="{Binding [unitGift]}" />
+                          </esControls:Marquee>
+                      </Grid>
+            
 					</Grid>
+          
+           <!-- 原文：矩形 可能是指分割线 -->
 					<Rectangle Grid.Row="1"
                                Style="{StaticResource DiplomacyHorizontalSeparatorStyle}" />
-					<!-- Player list -->
+					
+          <!-- Player list -->
+          <!--玩家每一行的内容 -->
 					<ItemsControl Grid.Row="2" ItemsSource="{Binding [players]}" IsTabStop="False">
 						<ItemsControl.ItemTemplate>
 							<DataTemplate>								
-								<Grid Visibility="{Binding [is_visible], Converter={StaticResource BoolToVis}}">
+                <Grid Visibility="{Binding [is_visible], Converter={StaticResource BoolToVis}}">
+                  <!--定义每一列宽度 -->
 									<Grid.ColumnDefinitions>
 										<ColumnDefinition MaxWidth="315" />
 										<ColumnDefinition Width="150" />  
 										<ColumnDefinition Width="200" /> 
 										<ColumnDefinition Width="200" />
+                    <ColumnDefinition Width="200" />
 									</Grid.ColumnDefinitions>
+             
+                                    <!--定义每一行高度 -->
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
@@ -597,8 +628,21 @@ function Diplomacy_CreateUI()
 											</DataTemplate>
 										</ItemsControl.ItemTemplate>
 									</ItemsControl>
-									
-									<Rectangle Grid.Row="1" Grid.ColumnSpan="4"
+                  
+                  <!-- UnitGift buttons CommandParameter="{Binding [unitGiftParameter]}"-->
+                  <Grid Grid.Column="4" VerticalAlignment="Center"  Margin="16,20" Visibility="{Binding [is_unitgift_visable], Converter={StaticResource BoolToVis}}">
+                    <Button Content="{esUtility:LocString $11161243}"
+                      Command="{Binding [unitGiftClickedCommand]}"
+                      CommandParameter="{Binding [unitGiftParameter]}"
+                      Style="{StaticResource HUDPrimaryRaisedTextButton}"
+                      Margin="16,30" IsTabStop="False"
+                      IsEnabled="{Binding [true]}"
+                      esUtility:AudioAttachedProperty.PreviewMouseLeftButtonUpSound="sfx_ui_hud_inGame_tribute_send_play">
+                    </Button>
+                  </Grid>
+                  <!--IsEnabled="{Binding [total_resources][amount], Converter={StaticResource GreaterCompare}, ConverterParameter=0}"-->
+                  
+									<Rectangle Grid.Row="1" Grid.ColumnSpan="5"
 											   Style="{StaticResource DiplomacyHorizontalSeparatorStyle}" />
 								</Grid>
 							</DataTemplate>
@@ -790,7 +834,7 @@ function Diplomacy_UpdateDataContext()
 			context_player.is_diplomacy_visible = not context_player.is_local and not context_player.is_eliminated 
 		end
 		
-		
+		--这里是设定按钮是否启用的限制条件
 		--Individual resource buttons
 		for j, resource in pairs(context_player.tribute) do
 			
@@ -838,6 +882,7 @@ function Diplomacy_UpdateDataContext()
 				resource.opacity = 0.44
 			end
 		end
+    
 	end	
 	Diplomacy_UpdateUI()
 end
@@ -891,34 +936,39 @@ function Diplomacy_CreateDataContext()
 	
 	local CreatePlayerDataContext = function(player)
 		local player_local = Core_GetPlayersTableEntry(Game_GetLocalPlayer())
-		local context_player = { 	
-				player_index = player.index,
-				is_local = player.isLocal,
-				is_eliminated = player.isEliminated,
-				name = {
-					text = Player_GetDisplayName(player.id).LocString,
-					color = UI_GetColourAsString(Player_GetUIColour(player.id)),
-					tooltip = Diplomacy_RelationToTooltipConverter(player, player_local),
-				},			
-				civ_flag = string.format("pack://application:,,,/WPFGUI;component/%s.png", string.gsub(World_GetRaceIcon(Player_GetRace(player.id)), "\\", "/" )),
-				team = {
-					number = player.AGS_Team.index, --player.team.index,
-					name = Diplomacy_FormatTeamNumber(player.AGS_Team.index), --Diplomacy_FormatTeamNumber(player.team.index)
-				},
-				age = _diplomacy.age[Player_GetCurrentAge(player.id)],
-				is_visible = true,																	-- whether to show this row at all
-				is_score_visible = true,				
-				is_tribute_visible = not player.isLocal,	
-				is_diplomacy_visible = not player.isLocal,			
-				is_tribute_enabled = _diplomacy.tribute.is_enabled and _diplomacy.tribute.is_market_built,-- and not player.isLocal,
-				relationTooltip = Diplomacy_RelationToTooltipConverter(player_local, player),
-				relationToolTipHeader = Loc_FormatText("$64c5019a145c4e4da448dbd3adeea61e:238"),
-				is_ally = Player_ObserveRelationship(player.id, player_local.id) == R_ALLY,
-				is_neutral = Player_ObserveRelationship(player.id, player_local.id) == R_NEUTRAL,
-				is_enemy = Player_ObserveRelationship(player.id, player_local.id) == R_ENEMY,
-				relations = {},
-				tribute = {},				
-		}
+    local context_player = { 	
+      player_index = player.index,
+      is_local = player.isLocal,
+      is_eliminated = player.isEliminated,
+      name = {
+        text = Player_GetDisplayName(player.id).LocString,
+        color = UI_GetColourAsString(Player_GetUIColour(player.id)),
+        tooltip = Diplomacy_RelationToTooltipConverter(player, player_local),
+      },			
+      civ_flag = string.format("pack://application:,,,/WPFGUI;component/%s.png", string.gsub(World_GetRaceIcon(Player_GetRace(player.id)), "\\", "/" )),
+      team = {
+        number = player.AGS_Team.index, --player.team.index,
+        name = Diplomacy_FormatTeamNumber(player.AGS_Team.index), --Diplomacy_FormatTeamNumber(player.team.index)
+      },
+      age = _diplomacy.age[Player_GetCurrentAge(player.id)],
+      is_visible = true,																	-- whether to show this row at all
+      is_score_visible = true,				
+      is_tribute_visible = not player.isLocal,	
+      is_diplomacy_visible = not player.isLocal,			
+      is_tribute_enabled = _diplomacy.tribute.is_enabled and _diplomacy.tribute.is_market_built,-- and not player.isLocal,
+      relationTooltip = Diplomacy_RelationToTooltipConverter(player_local, player),
+      relationToolTipHeader = Loc_FormatText("$64c5019a145c4e4da448dbd3adeea61e:238"),
+      is_ally = Player_ObserveRelationship(player.id, player_local.id) == R_ALLY,
+      is_neutral = Player_ObserveRelationship(player.id, player_local.id) == R_NEUTRAL,
+      is_enemy = Player_ObserveRelationship(player.id, player_local.id) == R_ENEMY,
+      is_unitgift_visable = Player_ObserveRelationship(player.id, player_local.id) == R_ALLY and not player.isLocal, -- 仅需满足是同盟玩家且不是自己就行
+      --unit_gift = UI_CreateCommand("Diplomacy_UnitGift"),
+      unitGiftClickedCommand = UI_CreateCommand("Diplomacy_UnitGift"),
+      unitGiftParameter = tostring(player.index),
+      relations = {},
+      tribute = {}, 
+      unitgift = {},
+    }
 		
 		for j, relation in ipairs(_diplomacy.relations) do
 			table.insert(context_player.relations, {
@@ -949,6 +999,7 @@ function Diplomacy_CreateDataContext()
 				},
 			})
 		end
+    
 		return context_player
 	end
 	

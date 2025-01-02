@@ -20,7 +20,7 @@
 				<DataProperty Name="m_modPart3" Type="UInt32" Value="341881811"/>
 				<DataProperty Name="m_modPart0" Type="UInt32" Value="2756928080"/>
 				<DataProperty Name="m_modPart1" Type="UInt32" Value="1245896614"/>
-				<DataProperty Name="m_locStringKey" Type="Int32" Value="1"/>
+				<DataProperty Name="m_locStringKey" Type="Int32" Value="4"/>
 			</DataObject>
 		</DataProperty>
 	</DataObject>

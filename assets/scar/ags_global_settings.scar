@@ -194,6 +194,8 @@ AGS_GLOBAL_SETTINGS = {
   MatchUI = true, -- undefined
   ObserverUI = true, -- undefined
   TournamentNomadBalance = false,
+   
+  EmpireWarExpertModel = true
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -239,6 +241,10 @@ function AGS_GlobalSettings_SetupSettings(options)
   
   if options.section_outer_handicap_settings then
     AGS_GlobalSettings_DefineHandicapSettings(options.section_outer_handicap_settings)
+  end
+  
+  if options.section_resource_sup_setting then
+    AGS_GlobalSettings_DefineResourceSupSetting(options.section_resource_sup_setting)
   end
 end
 
@@ -317,6 +323,11 @@ function AGS_GlobalSettings_DefineGameConditions(category)
   if category.option_game_condition_enable_ai_takeovers ~= nil then
     AGS_GLOBAL_SETTINGS.EliminationSettings.EnableAITakeover = category.option_game_condition_enable_ai_takeovers
   end
+  
+  --测试模式
+  if category.option_game_condition_enable_test_mode ~= nil then
+    AGS_GLOBAL_SETTINGS.EliminationSettings.IsTestMode = category.option_game_condition_enable_test_mode
+  end
 end
 
 function AGS_GlobalSettings_DefineWinSettings(category)    
@@ -391,6 +402,11 @@ function AGS_GlobalSettings_DefineGameSettings(category)
   end
   if category.option_game_setting_reveal_fow_on_elimination ~= nil then
     AGS_GLOBAL_SETTINGS.RevealFowOnElimination = category.option_game_setting_reveal_fow_on_elimination
+  end
+  
+  --如果帝国战争模式选项不为空，给全局对应选项赋值
+  if category.option_game_setting_empire_war ~= nil then
+    AGS_GLOBAL_SETTINGS.EmpireWarExpertModel = category.option_game_setting_empire_war
   end
 end
 
@@ -1184,4 +1200,21 @@ function AGS_GlobalSettings_SetTownCenterRestricts(tc_restrictions)
   elseif tc_restrictions.enum_value == tc_restrictions.enum_items.town_center_restriction_landmarks then
     AGS_GLOBAL_SETTINGS.TownCenterRestrictions = AGS_GS_TC_RESTRICTIONS_LANDMARKS
   end    
+end
+
+function AGS_GlobalSettings_DefineResourceSupSetting(category)
+  -- 资源支援函数
+  -- option_setting_resource_amount
+  -- 此处只要根据设置生成倍率，写入全局变量
+  if category.option_setting_resource_amount.enum_value == category.option_setting_resource_amount.enum_items.resource_0 then
+    AGS_GLOBAL_SETTINGS.ResourceSupRate = 1.25
+  elseif category.option_setting_resource_amount.enum_value == category.option_setting_resource_amount.enum_items.resource_1 then
+    AGS_GLOBAL_SETTINGS.ResourceSupRate = 1.75
+  elseif category.option_setting_resource_amount.enum_value == category.option_setting_resource_amount.enum_items.resource_2 then
+    AGS_GLOBAL_SETTINGS.ResourceSupRate = 2.5
+  elseif category.option_setting_resource_amount.enum_value == category.option_setting_resource_amount.enum_items.resource_3 then
+    AGS_GLOBAL_SETTINGS.ResourceSupRate = 3
+  elseif category.option_setting_resource_amount.enum_value == category.option_setting_resource_amount.enum_items.resource_4 then
+    AGS_GLOBAL_SETTINGS.ResourceSupRate = 4
+  end   
 end

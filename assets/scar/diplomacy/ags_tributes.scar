@@ -78,6 +78,55 @@ function Diplomacy_SendTributeNtw(playerID, data)
 	Core_CallDelegateFunctions("OnTributeSent", tribute_data)   
 end
 
+function Diplomacy_UnitGiftNtw(playerID, data)
+  --local sender = Core_GetPlayersTableEntry(playerID)
+  --local unit_gift_data = {}
+  local chunks = string.split(data, "|")  
+  local receiver = Core_GetPlayersTableEntryFromIndex(tonumber(chunks[2]))
+  local sg_all_squad = SGroup_CreateIfNotFound('sg_all_squad')
+  World_GetAllSquads(sg_all_squad)
+
+  local squadIdTable = string.split(chunks[1], ",") 
+  
+  for i = 1, #squadIdTable do 
+    local curpop = Player_GetTotalPopulation(receiver.id)
+    local maxPop = Player_GetCurrentPopulationCap(receiver.id, CT_Personnel)
+    local cue = _diplomacy.cue
+    if Core_Compare(maxPop, curpop ,IS_GREATER_THAN_OR_EQUAL) then
+      local function getSquadById(gid,idx,sid)
+        if Squad_GetID(sid) == tonumber(squadIdTable[i]) then
+          Squad_SetPlayerOwner(sid, receiver.id)
+          
+          local text = Loc_FormatText("$64c5019a145c4e4da448dbd3adeea61e:423", Player_GetDisplayName(receiver.id))    -- "%1PLAYER_NAME% has received unit assistance"
+          UI_CreateEventCueClickable(-1, cue.lifetime, 0, cue.repeatTime, text, cue.desc, cue.template, cue.icon, cue.sfx, cue.color.r, cue.color.g, cue.color.b, cue.color.a, cue.style, nothing)
+          
+        end
+      end
+      SGroup_ForEach(sg_all_squad, getSquadById)
+    else
+      local text = Loc_FormatText("$64c5019a145c4e4da448dbd3adeea61e:424", Player_GetDisplayName(receiver.id))    -- "%1AMOUNT% food received from %2PLAYER_NAME%"
+      UI_CreateEventCueClickable(-1, cue.lifetime, 0, cue.repeatTime, text, cue.desc, cue.template, cue.icon, cue.sfx, cue.color.r, cue.color.g, cue.color.b, cue.color.a, cue.style, nothing)
+    end
+        
+      
+            
+      --提示部分
+      --if unit_gift.receiver.isLocal and not unit_gift.receiver.isEliminated then
+        --Diplomacy_ShowEventCue(unit_gift)
+      --elseif sender.isLocal and (unit_gift.food > 0 or unit_gift.wood > 0 or unit_gift.gold > 0 or unit_gift.stone > 0) then
+        --local cue = _diplomacy.cue
+        --local text = Loc_FormatText(11164677, Player_GetDisplayName(unit_gift.receiver.id))    -- "Tribute sent to %1PLAYER_NAME%"
+        --UI_CreateEventCueClickable(-1, cue.lifetime, 0, cue.repeatTime, text, cue.desc, cue.template, cue.icon, cue.sfx, cue.color.r, cue.color.g, cue.color.b, cue.color.a, cue.style, nothing)
+      --end
+   
+  end  
+  
+  _diplomacy.tribute.is_in_progress = false
+  Diplomacy_UpdateDataContext()
+  Rule_AddOneShot(Rule_Diplomacy_UpdateUI, 0)
+    
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Callbacks:
 ---------------------------------------------------------------------------------------------------
@@ -137,6 +186,49 @@ function Diplomacy_ClearTribute()
 	Diplomacy_UpdateDataContext()
 end
 
+function Diplomacy_UnitGift(parameter)
+  local unit_gift_data = ""
+  
+  local sg_unit_selection = SGroup_CreateIfNotFound("sg_unit_selection")
+  local sender = Core_GetPlayersTableEntry(Game_GetLocalPlayer())
+  local receiver_index = tonumber(parameter)
+  
+  local function squadGetOwner(gid, idx, sid)
+    --must local player
+    
+    if Squad_IsOwnedByPlayer(sid, sender.id) then
+      if not Squad_IsOfType(sid, 'scar_villager') and
+        not Squad_IsOfType(sid, 'scar_official') and 
+        not Squad_IsOfType(sid, 'scar_trade_cart') and 
+        not Squad_IsOfType(sid, 'king') and 
+        not Squad_IsOfType(sid, 'scar_monk') and 
+        not Squad_IsOfType(sid, 'scar_khan') and
+        not Squad_IsOfType(sid, 'jeanne_d_arc') then
+        unit_gift_data = unit_gift_data .. tostring(sid.SquadID) .. ','
+      end
+     
+    end
+  end
+  
+  Misc_GetSelectedSquads( sg_unit_selection, false )
+  
+  if SGroup_Count(sg_unit_selection) then
+    SGroup_ForEach(sg_unit_selection, squadGetOwner)
+  end
+  
+  --for i, player in pairs(_diplomacy.data_context.players) do
+    --local receiver = 0
+    --if player.player_index == tonumber(parameter) then
+      --receiver = tonumber(parameter) 
+    --end  
+    
+  --end
+  --如果字符串长度不为0
+  if #unit_gift_data > 0 then
+    unit_gift_data = string.format("%s|%d", unit_gift_data, receiver_index)
+    Network_CallEvent("Diplomacy_UnitGiftNtw", unit_gift_data)
+  end  
+end
 ---------------------------------------------------------------------------------------------------
 -- Functions:
 ---------------------------------------------------------------------------------------------------

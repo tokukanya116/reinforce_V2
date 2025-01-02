@@ -148,6 +148,7 @@ import("ai/ags_ai.scar")
 --import("gameplay/ags_site_limit.scar")
 --import("gameplay/ags_military_sites.scar")
 --import("balance/ags_tournament_nomad_balance.scar")
+import("startconditions/ags_start_empire_war.scar")
 
 -- 包装所有默认设置选项，减少可能对其选项的影响.
 import("specials/ags_utilities.scar")

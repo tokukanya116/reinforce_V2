@@ -13,59 +13,187 @@ AGS_TESTING_MODULE = "AGS_Testing"
 -- Delegates:
 ---------------------------------------------------------------------------------------------------
 
-Core_RegisterModule(AGS_TESTING_MODULE)	
+Core_RegisterModule(AGS_TESTING_MODULE)  
 
 function AGS_Testing_UpdateModuleSettings()
-	AGS_Print("AGS_Testing_UpdateModuleSettings")
-	if not AGS_GLOBAL_SETTINGS.IsTestMode then
-		Core_UnregisterModule(AGS_TESTING_MODULE)
-	end
+  AGS_Print("AGS_Testing_UpdateModuleSettings")
+  if not AGS_GLOBAL_SETTINGS.IsTestMode then
+    Core_UnregisterModule(AGS_TESTING_MODULE)
+  end
 end
 
 function AGS_Testing_OnPlay()
-	for _, player in pairs(PLAYERS) do
-		AGS_Print(player.id, player.raceName)
-	end
-end		
+  AGS_Testing_CreateObjective()
+  --开局5分钟后执行
+  Rule_AddOneShot(AGS_Testing_Delay_5min, 300)
+  --开局10分钟后执行
+  Rule_AddOneShot(AGS_Testing_Delay_10min, 600)
+  --开局后25分钟检查强制ai联通进唐朝
+  Rule_AddOneShot(AGS_Testing_Delay_Dynasty, 1200)
+end    
 
 ---------------------------------------------------------------------------------------------------
 -- Functions:
 ---------------------------------------------------------------------------------------------------
+function AGS_Testing_Delay_5min()
+  --Rule_AddInterval(AGS_Testing_RemoveEntities, 900)
+  Rule_AddInterval(AGS_Testing_RemoveUnits, 720)
+end
+
+function AGS_Testing_Delay_10min()
+  Rule_AddInterval(AGS_Testing_Reset_AI_Attack_Target, 120)
+end
+
+function AGS_Testing_Delay_Dynasty()
+  for _, player in pairs(PLAYERS) do
+    if player.raceName == AGS_CIV_CHINESE then
+      if AI_IsAIPlayer(player.id) then
+        if Player_IsAlive(player.id) then
+          AGS_Testing_AIChineseTryUpgradeDynasty(player.id)
+          --local stone_wall_blueprint = AGS_GetCivilizationEntity(player.raceName, AGS_BP_ANY_WALL)
+          --local stone_wall_bastion_blueprint = AGS_GetCivilizationEntity(player.raceName, AGS_BP_ANY_BASTION)
+          --local stone_wall_gate_blueprint = AGS_GetCivilizationEntity(player.raceName, AGS_BP_ANY_GATE)
+          ----local spawn_position = AGS_Starts_GetStartPosition(player.id)      
+          ----AGS_Fortified_WallAroundPosition(player, palisade_blueprint, palisade_gate_blueprint, spawn_position)
+        end
+      end
+    end    
+  end
+end
+
+function AGS_Testing_Reset_AI_Attack_Target()
+  for _, player in pairs(PLAYERS) do
+    if AI_IsAIPlayer(player.id) then
+      if Player_IsAlive(player.id) then
+        local player_attack_sgroup = Player_GetSquads(player.id)
+        local function get_player_sgroup_plane_to_attack(gid, idx, sid)
+          if Squad_IsOfType(sid, 'scar_scout') or Squad_IsOfType(sid, 'scar_villager') or Squad_IsOfType(sid, 'scar_sheep') then
+            SGroup_Remove(player_attack_sgroup, sid)
+          end
+        end
+        
+        --local enemy = Core_GetPlayersTableEntry(Player_FindFirstEnemyPlayer(player.id))
+        
+        --AGS_Print(player.raceName.."当前敌人"..tostring(enemy.PlayerID))
+        --local TC_CAPITAL =  EGroup_GetEntityAt(Player_GetEntitiesFromType(enemy.id, AGS_BP_TC_CAPITAL), 1)
+        --local player_town_center_pos = Entity_GetPosition( TC_CAPITAL )
+        local world_center = World_Pos(0, 0, 0)
+ 
+        SGroup_ForEach(player_attack_sgroup, get_player_sgroup_plane_to_attack)
+        Cmd_AttackMove( player_attack_sgroup, world_center, true, "", 60, false, false )
+        --AIPlayer_UpdateSkirmishAttackAndCaptureTasks(player.id)
+      end
+    end   
+  end
+end
+
+-- 清空可能会导致单位卡顿的单位
+function AGS_Testing_RemoveUnits()
+  if AGS_GLOBAL_SETTINGS.MaximumPopulation <= 275 then
+    return
+  end
+  
+  for _, player in pairs(PLAYERS) do
+    if AI_IsAIPlayer(player.id) then
+      if Player_IsAlive(player.id)  then
+        -- 冲车，叉叉，步弓，肉马
+        local sgroup_without_gatherer = SGroup_CreateIfNotFound('ai'..tostring(player.id)..'filter_sg')
+        local player_all_sgroups = Player_GetSquads(player.id)
+        local player_civ_prefixes = AGS_GLOBAL_SETTINGS.Prefixes[player.raceName] 
+        bp_squad = BP_GetSquadBlueprint("unit_villager_1_"..player_civ_prefixes)
+        --SGroup_Filter(farm,,AGS_GetCivilizationUnit(AGS_BP_VILLAGER),player_all_sgroups)
+        SGroup_Filter(player_all_sgroups, bp_squad, FILTER_REMOVE , sgroup_without_gatherer)
+        SGroup_Kill(player_all_sgroups)
+      end
+    end
+  end
+end
+
+function AGS_Testing_RemoveEntities()
+  for _, player in pairs(PLAYERS) do
+    if AI_IsAIPlayer(player.id) then
+      if Player_IsAlive(player.id)  then
+        -- 冲车，叉叉，步弓，肉马
+        local egroup_without_gatherer = EGroup_CreateIfNotFound('ai'..tostring(player.id)..'filter_eg')
+        local player_all_egroups = Player_GetEntities(player.id)
+
+        bp_entities = AGS_GetCivilizationEntity(player.raceName, AGS_BP_ECOM_WOOD)
+        EGroup_Filter(player_all_egroups, bp_entities, FILTER_REMOVE, egroup_without_gatherer)
+        EGroup_Kill(egroup_without_gatherer)
+      end
+    end
+  end
+end
+
+function AGS_Testing_AIChineseTryUpgradeDynasty(player_id)
+  --BP_GetUpgradeBlueprint --Cmd_InstantUpgrade Cmd_Upgrade --LocalCommand_PlayerUpgrade --player_dynasty3_chi
+  if Player_HasBuilding(player_id, 'spirit_way') then
+    local dynasty2_blueprint = BP_GetUpgradeBlueprint('player_dynasty2_chi')
+    local dynasty3_blueprint = BP_GetUpgradeBlueprint('player_dynasty3_chi')
+    
+    --Player_RemoveUpgrade
+    LocalCommand_PlayerUpgrade( player_id, dynasty3_blueprint, true, false )
+    Player_RemoveUpgrade(player_id, dynasty2_blueprint)
+  end
+end
 
 function AGS_Testing_RemoveGaia()
-	local egroup = EGroup_CreateUnique()
-	World_GetAllNeutralEntities(egroup)
-	EGroup_Filter(egroup, "animal", FILTER_KEEP)
-	EGroup_DestroyAllEntities(egroup)    		
-	EGroup_Destroy(egroup)
+  local egroup = EGroup_CreateUnique()
+  World_GetAllNeutralEntities(egroup)
+  EGroup_Filter(egroup, "animal", FILTER_KEEP)
+  EGroup_DestroyAllEntities(egroup)        
+  EGroup_Destroy(egroup)
 end
 
-function AGS_Testing_RemoveUnits()
-	for _, player in pairs(PLAYERS) do
-		SGroup_DestroyAllSquads(Player_GetSquads(player.id))
-	end
-end
 -- Returns option from command line like "-cheat" by asking for "cheat"
 function AGS_Testing_HasCommandLineOption(option_name)
-	return Misc_IsCommandLineOptionSet(option_name)
+  return Misc_IsCommandLineOptionSet(option_name)
 end
 
 function AGS_Testing_SpawnTest()
-	for i, player in pairs(PLAYERS) do
-		local player_civ = player.raceName
-		
-		local snameSHP = AGS_SGroupName(player.id, "danes")
-		local sbp_shp = BP_GetSquadBlueprint("unit_raider_dane")
-		local sg_shp = AGS_SpawnSquad(player.id, snameSHP, sbp_shp, nil, World_Pos(-10, 0, -10), 5)
-		local sbp_shp = BP_GetSquadBlueprint("unit_militia_1_rus")
-		local sbp_shp = BP_GetSquadBlueprint("unit_great_trebuchet_cmp_mon")
-		local sbp_shp = BP_GetSquadBlueprint("unit_landsknecht_mercenary_3_hre_cmp")
-		local sbp_shp = BP_GetSquadBlueprint("unit_shield_villager_cmp_fre")
-		local sbp_shp = BP_GetSquadBlueprint("unit_supply_cart_eng")
-		local sbp_shp = BP_GetSquadBlueprint("unit_foot_knight_2_cmp_eng")
-		local sbp_shp = BP_GetSquadBlueprint("unit_shield_villager_cmp_eng")
-		local sbp_shp = BP_GetSquadBlueprint("unit_shieldwall_hastings_cmp_eng")
-		local sbp_shp = BP_GetSquadBlueprint("unit_supply_cart_chi")
-		local sbp_shp = BP_GetSquadBlueprint("unit_militia_cmp_chi")
-	end
+  for i, player in pairs(PLAYERS) do
+    local player_civ = player.raceName
+    
+    local snameSHP = AGS_SGroupName(player.id, "danes")
+    local sbp_shp = BP_GetSquadBlueprint("unit_raider_dane")
+    local sg_shp = AGS_SpawnSquad(player.id, snameSHP, sbp_shp, nil, World_Pos(-10, 0, -10), 5)
+    local sbp_shp = BP_GetSquadBlueprint("unit_militia_1_rus")
+    local sbp_shp = BP_GetSquadBlueprint("unit_great_trebuchet_cmp_mon")
+    local sbp_shp = BP_GetSquadBlueprint("unit_landsknecht_mercenary_3_hre_cmp")
+    local sbp_shp = BP_GetSquadBlueprint("unit_shield_villager_cmp_fre")
+    local sbp_shp = BP_GetSquadBlueprint("unit_supply_cart_eng")
+    local sbp_shp = BP_GetSquadBlueprint("unit_foot_knight_2_cmp_eng")
+    local sbp_shp = BP_GetSquadBlueprint("unit_shield_villager_cmp_eng")
+    local sbp_shp = BP_GetSquadBlueprint("unit_shieldwall_hastings_cmp_eng")
+    local sbp_shp = BP_GetSquadBlueprint("unit_supply_cart_chi")
+    local sbp_shp = BP_GetSquadBlueprint("unit_militia_cmp_chi")
+  end
 end
+
+function AGS_Testing_Find_Enemy()
+  --先遍历玩家表，查出敌对关系
+  --把敌人全写到新表
+  --根据首都城镇中心是否摧毁判断要不要找下一个敌人
+end
+
+--参数
+--AGS_TSETING_OBJECTIVES_CONQUEST = {
+  --reason = WR_NONE,
+  --title = "$64c5019a145c4e4da448dbd3adeea61e:425", 
+  --title_lost = Loc_Empty(),
+  --title_victory = Loc_Empty(),
+  --description = Loc_Empty(),
+  --icon = "icons\\races\\common\\victory_conditions\\victory_condition_conquest",
+  --data_template = "ConquestObjectiveTemplate",
+  --data_template_or = "ConquestObjectiveTemplate",
+  --priority = OT_Primary,
+  --parent = 0,
+  --telemetry = "conquestObj",
+  --alert = "icons\\event_queue_high_priority_large",
+--}
+
+----模板
+--function AGS_Testing_CreateObjective() 
+  --AGS_TSETING_CONQUEST_OBJECTIVE = AGS_Objectives_Create(AGS_TSETING_OBJECTIVES_CONQUEST, AGS_GS_LOCAL_PLAYER)
+  --AGS_Objectives_Set(AGS_TSETING_CONQUEST_OBJECTIVE, OS_Incomplete, true)
+--end

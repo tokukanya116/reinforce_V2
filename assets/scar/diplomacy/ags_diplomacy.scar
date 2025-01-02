@@ -65,6 +65,8 @@ function AGS_Diplomacy_LateInitializations()
 	if _diplomacy ~= nil then 
 		Network_RegisterEvent("Diplomacy_ChangeRelationNtw")
 		Network_RegisterEvent("Diplomacy_SendTributeNtw")
+    -- 必须要往客户端注入
+    Network_RegisterEvent("Diplomacy_UnitGiftNtw")
 		
 		-- Initial age
 		for _, context_player in pairs(_diplomacy.data_context.players) do				
@@ -211,6 +213,7 @@ function AGS_Diplomacy_Create(relations)
 				toggle_ui = UI_CreateCommand("Diplomacy_ToggleDiplomacyUI"),
 				send_tribute = UI_CreateCommand("Diplomacy_SendTribute"),
 				clear_tribute = UI_CreateCommand("Diplomacy_ClearTribute"),
+        unit_gift = UI_CreateCommand("Diplomacy_UnitGift"), --接下来你需要写一个执行函数 Diplomacy_UnitGift
 			},
 			subtotal = {
 				{amount = 0, opacity = 0.0},	-- food subtotal	-- opacity is a hack to get around NumberToVis converter not supporting Hidden.
@@ -225,6 +228,9 @@ function AGS_Diplomacy_Create(relations)
 			increment = 100,						-- Amount by which one button click increments/decrements tribute
 			IsMultiPage = false,
 			headerRelations = Loc_FormatText("$64c5019a145c4e4da448dbd3adeea61e:234"),
+      -- 单位赠予标题
+      unitGift = Loc_FormatText("$64c5019a145c4e4da448dbd3adeea61e:419"),
+      unitGiftFormatter = Loc_FormatText("$64c5019a145c4e4da448dbd3adeea61e:420"),
 		},
 		cue = {							-- Event cue template (shown when player changes relationship or receives tribute) 
 			lifetime = 10.0,
@@ -250,8 +256,8 @@ function AGS_Diplomacy_Create(relations)
 			is_score_visible_override = nil, 		-- used to override data_context.players.player.is_score_visible	
 			is_team_visible_override = nil,			-- used to override data_context.players.player.is_team_visible	
 			
-			normal_increment = 100,				    -- Amount by which a button click alone increases/decreases tribute
-			multiplied_increment = 500,				-- Amount by which a button click with left trigger held increases/decreases tribute
+			normal_increment = 300,				    -- Amount by which a button click alone increases/decreases tribute
+			multiplied_increment = 1000,				-- Amount by which a button click with left trigger held increases/decreases tribute
 			tax_rate = 0.3,							-- TODO: Move this into AE data?
 			limit = 9999,							-- Limit button text to 4 digits so it doesn't wrap
 		},		
@@ -266,6 +272,10 @@ function AGS_Diplomacy_Create(relations)
 			{ relation_type = R_NEUTRAL, image = "pack://application:,,,/WPFGUI;component/icons/races/common/buildings/market.png", help = "$64c5019a145c4e4da448dbd3adeea61e:240", title = "$64c5019a145c4e4da448dbd3adeea61e:236" },
 			{ relation_type = R_ENEMY, image = "pack://application:,,,/WPFGUI;component/icons/races/common/buildings/barracks.png", help = "$64c5019a145c4e4da448dbd3adeea61e:241", title = "$64c5019a145c4e4da448dbd3adeea61e:237" },
 		},
+    -- 单位赠予悬停提示
+    unitgift = {
+      { unitgift_type = UGT_Normal, image = "pack://application:,,,/WPFGUI;component/icons/races/common/buildings/market.png", help = "$64c5019a145c4e4da448dbd3adeea61e:421", title = "$64c5019a145c4e4da448dbd3adeea61e:420" },
+    },
 		age = {						-- Loc_string lookup table (indexed by age)
 			Loc_GetString(11180928),					-- I
 			Loc_GetString(11180929),					-- II
