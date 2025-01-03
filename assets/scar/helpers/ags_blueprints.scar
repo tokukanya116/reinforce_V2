@@ -1697,3 +1697,60 @@ end
 function AGS_GetCurrentName(player)
 	return Core_GetPlayerName(player.id)
 end
+
+function AGS_EGroup_GetClosestEntity(egroup, position, limit)
+  local closest_distance_sqr = 1000000000000
+  local closest_entity = nil
+  
+  local _CheckEntity = function(gid, idx, eid)
+    local entityPosition = Entity_GetPosition(eid)
+    local distance_sqr = World_DistanceSquaredPointToPoint(entityPosition, position)
+    
+    if distance_sqr < closest_distance_sqr then   
+      if limit ~= nil then
+        if distance_sqr > limit.distance then
+          closest_distance_sqr = distance_sqr
+          closest_entity = eid
+        end
+      else
+        closest_distance_sqr = distance_sqr
+        closest_entity = eid
+      end
+    end
+    
+    --if limit ~= nil then
+      --limit.build_ent_pos
+      --distance = 20
+    --end
+    
+  end
+  EGroup_ForEach(egroup, _CheckEntity)
+  
+  return closest_entity
+end
+
+function AGS_EGroup_GetClosestSquad(sgroup, position, limit)
+  local closest_distance_sqr = 1000000000000
+  local closest_squad = nil
+  
+  local _CheckEntity = function(gid, idx, sid)
+    local squadPosition = Squad_GetPosition(sid)
+    local distance_sqr = World_DistanceSquaredPointToPoint(squadPosition, position)
+    
+    if distance_sqr < closest_distance_sqr then   
+      if limit ~= nil then
+        if distance_sqr > limit.distance then
+          closest_distance_sqr = distance_sqr
+          closest_squad = sid
+        end
+      else
+        closest_distance_sqr = distance_sqr
+        closest_squad = sid
+      end
+    end
+    
+  end
+  SGroup_ForEach(sgroup, _CheckEntity)
+  
+  return closest_squad
+end
