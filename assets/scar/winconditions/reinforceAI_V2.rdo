@@ -257,7 +257,7 @@
 					</DataObject>
 					<!--WinCondition/WinCondition::OptionsUIDescriptor/WinCondition::OptionSectionUIDescriptor/-->
 					<DataObject Name="" Type="WinCondition::OptionSectionUIDescriptor" Id="4970992746559209822" OwnerId="8105827415814368454" Comment="游戏设定">
-						<DataProperty Name="m_featured" Type="Bool" Value="true"/>
+						<DataProperty Name="m_featured" Type="Bool" Value="false"/>
 						<DataProperty Name="m_key" Type="String" Value="section_inner_game_conditions"/>
 						<DataProperty Name="m_options" Type="Object">
 							<DataValue Name="WinCondition::BooleanOptionUIDescriptor">7784981719828510021</DataValue>

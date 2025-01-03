@@ -54,6 +54,36 @@ end
   --end
 --end
 
+--生成帝国战争模式所需的表和内容
+function AGS_Empire_War_Start_Setting()
+  for _, player in pairs(PLAYERS) do
+    local ew_content = { 
+      player_id = player.id,
+      player_civ = player.raceName,
+      player_index = player.index, --玩家索引
+      is_local = player.isLocal,
+      is_human = player.isHuman,
+      start_pos = Player_GetStartingPosition(player.id)
+    }
+    
+    if not AGS_AI_IsAI(player.id) then
+      AGS_Empire_War_StartUnitsSetting(ew_content.player_id, ew_content.player_civ)
+      --AGS_Empire_War_AssignUnitsToResources(ew_content)
+      
+      --当帝国战争模板启动时，这个表一定会生成，所以你可以很方便找到生成的实体，而不需要getAllEntities
+      for _, t_town in pairs(_townGen.towns) do
+        local uid = Player_GetID(player.id)
+        if t_town.playerID == uid then
+          AGS_Empire_War_AssignUnitsToResources(ew_content, t_town)
+        end
+      end
+    end
+    
+    --Rule_AddOneShot( LuaFunction rule, Real OPT_delay, Table OPT_data, EGroupID OPT_group )
+    Rule_AddOneShot(Reinforce_AI_DefaultSettings, 5, ew_content)
+  end
+end
+
 --删掉所有的预生成，再重新按照民族生成特殊单位
 --此处杀掉农民和侦察兵还有羊就行，其他都不要动免得需要再生成
 --贞德是农民需要特殊区分
@@ -93,7 +123,7 @@ function AGS_Empire_War_StartUnitsSetting(player_id, player_civ)
 end
 
 --自动派遣单位采集
-function AGS_Empire_War_AssignUnitsToResources(content)
+function AGS_Empire_War_AssignUnitsToResources(context_data, spawn_table)
   -- 派遣挖矿
   local function _AssignGoldminer(gid, idx, sid)
     SGroup_Single(sg_single, sid)
@@ -160,85 +190,29 @@ function AGS_Empire_War_AssignUnitsToResources(content)
     end
   end
   
-  --找出地图上所有自然实体
-  allNeutralEntities = EGroup_CreateIfNotFound("allNeutralEntities")
-  World_GetAllNeutralEntities(allNeutralEntities)
-  
-  
-  local tc_capital =  EGroup_GetEntityAt( Player_GetEntitiesFromType( content.player_id, AGS_BP_TC_CAPITAL ), 1)
-  local tc_capital_pos = Entity_GetPosition( tc_capital )
-   
-  -- 智慧宫
-  if content.player_civ == 'abbasid' or content.player_civ == 'abbasid_ha_01' then
-    AGS_Empire_War_Generate_Building_PreSetting(content.player_id, content.player_civ, "landmark_abb", nil, tc_capital, allNeutralEntities)
+  --我们传入的已经是玩家对应的表，无需再费心
+  -- failedPlacements:首都城镇中心表 
+  -- spawnSets:其他建筑表
+  for _, t_spawn_entities in pairs(spawn_table.spawnSets) do
+    if t_spawn_entities.id ~= "town_center_set" then
+      
+      -- 生成的除城镇中心外的建筑
+      for e_idx, entity in pairs(t_spawn_entities.structureGroups) do
+        local entity_id = entity.entityIDs[1]
+        local entity_type = entity.id
+        
+        --local table_entities = {}
+        
+        --table.insert(table_entities, { 
+          --entity_type = entity_id,
+        --})
+        
+      
+      end
+    end
   end
-   
-  --生成采集建筑
-  AGS_Empire_War_Generate_Building_PreSetting(content.player_id, content.player_civ, "gold_mining_camp", nil, tc_capital, allNeutralEntities)
-  AGS_Empire_War_Generate_Building_PreSetting(content.player_id, content.player_civ, "stone_mining_camp", nil, tc_capital, allNeutralEntities)
-  AGS_Empire_War_Generate_Building_PreSetting(content.player_id, content.player_civ, "econ_food", nil, tc_capital, allNeutralEntities)
-  AGS_Empire_War_Generate_Building_PreSetting(content.player_id, content.player_civ, "econ_wood", nil, tc_capital, allNeutralEntities) 
   
-  
-  --默认绵羊采集区
-  --local gather_sheep_pos =  World_Pos(tc_capital_pos.x - 3.5, 0, tc_capital_pos.z - 7.5)
-  --重设中国文明的采集区
-  --if player_civ == 'chinese' or player_civ == 'chinese_ha_01' then
-    --gather_sheep_pos = Entity_GetPosition(ent_econ_food)
-  --end
-  
-  ---- 重设蒙古文明的采集区
-  --if player_civ == 'mongol' then
-    --local pos = Entity_GetPosition(ent_econ_wood) 
-    --gather_sheep_pos = World_Pos(pos.x - 3.5, 0, pos.z - 7.5)
-  --end
-  
-  -- 生成的羊
-  --local sg_player_resource_food_sheep = AGS_Empire_War_Generate_Sgroup_PreSetting(content.player_id, content.player_civ, "econ_food_resource_sheep", 'resource', gather_sheep_pos, true)
-  
-  --table.insert(content.building_table, {
-      --tc_capital = tc_capital,
-      --ent_gold_mining_camp = ent_gold_mining_camp,
-      --ent_stone_mining_camp = ent_stone_mining_camp,
-      --ent_econ_food = ent_econ_food,
-      --ent_econ_wood = ent_econ_wood,
-      --landmark_abb = landmark_abb,
-      --ovoo = ovoo
-  --})
-  
-  ----local building_table = {
-     ----tc_capital,
-     ----ent_gold_mining_camp,
-     ----ent_stone_mining_camp,
-     ----ent_econ_food,
-     ----ent_econ_wood,
-     ----landmark_abb,
-     ----ovoo 
-  ----}
-  
-  ------ 额外生成的建筑
-  --AGS_Empire_War_Extra_Generate_Building_PreSetting(content.player_id, content.player_civ, nil, content.building_table[1])
-  
-  ----生成派发的村民
-  --local sg_player_goldminer = AGS_Empire_War_Generate_Sgroup_PreSetting(player_id, player_civ, "econ_gold", 'worker', player_building_position_table['pos_gold_mining_camp'], true)
-  --local sg_player_econ_food_sheep = AGS_Empire_War_Generate_Sgroup_PreSetting(player_id, player_civ, "econ_food_sheep", 'worker', gather_sheep_pos, true)
-  --local sg_player_econ_food_berry = AGS_Empire_War_Generate_Sgroup_PreSetting(player_id, player_civ, "econ_food_berry", 'worker', player_building_position_table['pos_econ_food'], true)
-  --local sg_player_econ_wood = AGS_Empire_War_Generate_Sgroup_PreSetting(player_id, player_civ, "econ_wood", 'worker', player_building_position_table['pos_econ_wood'], true)
-  
-  ----侦察兵
-  --AGS_Empire_War_Generate_Sgroup_PreSetting(player_id, player_civ, "extra", 'scout',  World_Pos(player_town_center_pos.x-8, 0, player_town_center_pos.z-8))
-
-  ----朝廷命官
-  ----if player_civ == 'chinese' or player_civ == 'chinese_ha_01' then
-  ----AGS_Empire_War_Generate_Sgroup_PreSetting(player_id, player_civ, "extra", 'official', player_building_position_table)
-  ----end
-  
-  
-  ----if player_civ == 'sultanate' then
-  ----AGS_Empire_War_Generate_Sgroup_PreSetting(player_id, player_civ, "extra", 'monk', player_building_position_table)
-  ----end
-  
-  ----遍历执行派遣
+   ----遍历执行派遣
   --if sg_player_goldminer ~= nil then 
   --SGroup_ForEach(sg_player_goldminer, _AssignGoldminer)
   --end
@@ -252,36 +226,18 @@ function AGS_Empire_War_AssignUnitsToResources(content)
   --SGroup_ForEach(sg_player_econ_wood, _AssignGatherWood)
   --end
   
+  
+  
+
 
   end
 
---生成帝国战争模式所需的表和内容
-function AGS_Empire_War_Start_Setting()
-  for _, player in pairs(PLAYERS) do
-    local ew_content = { 
-      player_id = player.id,
-      player_civ = player.raceName,
-      player_index = player.index, --玩家索引
-      is_local = player.isLocal,
-      is_human = player.isHuman,
-      start_pos = Player_GetStartingPosition(player.id)
-    }
-    
-    if not AGS_AI_IsAI(player.id) then
-      AGS_Empire_War_StartUnitsSetting(ew_content.player_id, ew_content.player_civ)
-      --AGS_Empire_War_AssignUnitsToResources(ew_content)
-      
-      --当帝国战争模板启动时，这个表一定会生成 --这个模式选择就会报错等官方修复吧
-      --for _, t_town in pairs(_townGen.towns) do
-      --if t_town.playerID == player.id then
-      --AGS_Empire_War_AssignUnitsToResources(ew_content, t_town)
-      --end
-      --end
-    end
-    
-    --Rule_AddOneShot( LuaFunction rule, Real OPT_delay, Table OPT_data, EGroupID OPT_group )
-    Rule_AddOneShot(Reinforce_AI_DefaultSettings, 5, ew_content)
-  end
+function AGS_Empire_War_AssignUnitsToResources()
+   --AGS_Empire_War_AssignUnitsToResources
+  
+  
+   
+  
 end
 
 function Reinforce_AI_DefaultSettings(context, data)
