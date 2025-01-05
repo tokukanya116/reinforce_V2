@@ -7,8 +7,6 @@
 ---------------------------------------------------------------------------------------------------
 
 AGS_Empire_War_MODULE = "AGS_Empire_War"
-needUpdateEntities = false
-allNeutralEntities = nil
 
 ---------------------------------------------------------------------------------------------------
 -- Delegates:
@@ -30,29 +28,6 @@ function AGS_Empire_War_PresetExecute()
   AGS_Print("帝国战争模式预设置")
   AGS_Empire_War_Start_Setting()
 end
-
---function AGS_Nomadic_DestroySpawn()
-  --AGS_Print("AGS_Nomadic_DestroySpawn")
-  --for _, player in pairs(PLAYERS) do  
-    --EGroup_DestroyAllEntities(Player_GetEntities(player.id))
-  --end
---end
-
---function AGS_AI_ApplyAdjustment_StoneVision()
-  --local outcrop_group = EGroup_CreateIfNotFound("stone_outcrops")
-  --World_GetAllNeutralEntities(outcrop_group)
-  --for _, player in pairs(PLAYERS) do         
-    --if AGS_AI_IsAI(player.id) and player.raceName == AGS_CIV_MONGOL then      
-      --local _AGS_ShowStone = function(gid, idx, eid)    
-        --if eid ~= nil and Entity_IsOfType(eid, "resource") and Entity_IsOfType(eid, "stone") then
-          --local stone_position = Entity_GetPosition(eid)
-          --FOW_PlayerRevealArea(player.id, stone_position, 10, 0.25)
-        --end    
-      --end      
-      --EGroup_ForEach(outcrop_group, _AGS_ShowStone)  
-    --end
-  --end
---end
 
 --生成帝国战争模式所需的表和内容
 function AGS_Empire_War_Start_Setting()
@@ -80,6 +55,7 @@ function AGS_Empire_War_Start_Setting()
     
     --Rule_AddOneShot( LuaFunction rule, Real OPT_delay, Table OPT_data, EGroupID OPT_group )
     Rule_AddOneShot(Reinforce_AI_DefaultSettings, 5, ew_content)
+    Rule_AddOneShot(AGS_AddQueueProductionItem_ONCE, 2, ew_content)
   end
 end
 
@@ -87,14 +63,15 @@ end
 --此处杀掉农民和侦察兵还有羊就行，其他都不要动免得需要再生成
 --贞德是农民需要特殊区分
 function AGS_Empire_War_StartUnitsSetting(player_id, player_civ)
-  --local player_start_sgroup = Player_GetSquads(player_id)
-  --local function get_kill_sgroup(gid, idx, sid)
-    --if Squad_IsOfType(sid, 'scar_scout') or Squad_IsOfType(sid, 'scar_villager') and not Squad_IsOfType(sid, 'jeanne_d_arc') then
-      ---- or Squad_IsOfType(sid, 'scar_sheep') 
-      --Squad_Destroy(sid)
-    --end
-  --end
-  --SGroup_ForEach(player_start_sgroup, get_kill_sgroup)
+  local player_start_sgroup = Player_GetSquads(player_id)
+  local function get_kill_sgroup(gid, idx, sid)
+    if (Squad_IsOfType(sid, 'scar_villager') and not Squad_IsOfType(sid, 'jeanne_d_arc')) or Squad_IsOfType(sid, 'scar_official') then
+      -- or Squad_IsOfType(sid, 'scar_scout') 
+      -- or Squad_IsOfType(sid, 'scar_sheep') 
+      Squad_Destroy(sid)
+    end
+  end
+  SGroup_ForEach(player_start_sgroup, get_kill_sgroup)
   
   ----要移除掉蒙古的蒙古包
   --if player_civ == 'mongol' then
@@ -108,15 +85,6 @@ function AGS_Empire_War_StartUnitsSetting(player_id, player_civ)
   
   --EGroup_ForEach(player_start_entities, get_kill_entity)
   --end
-
-  
-  -- 添加生产队(需要延迟，此时还未在地图上生成)
-  local TC =  EGroup_GetEntityAt(Player_GetEntitiesFromType(player_id, AGS_BP_TC_CAPITAL), 1)
-  if TC then
-    for s = 1, 3 do
-      Entity_QueueProductionItemByPBG( TC, PITEM_Spawn, AGS_GetCivilizationUnit(player_civ, AGS_BP_VILLAGER) )
-    end
-  end
 end
 
 --自动派遣单位采集
@@ -125,10 +93,14 @@ function AGS_Empire_War_AssignUnitsToResources(context_data, spawn_table)
   local player_id = context_data.player_id
   local player_civ = context_data.player_civ
   
-  -- 派遣挖矿
+  -- 派遣挖金矿
   local function _AssignGoldminer(gid, idx, sid)
     SGroup_Single(sg_single, sid)
-    local eg_gold = AGS_GetClosestGoldEntity(player_id, Util_GetPosition(sid), 15)
+    
+    local egroup_closest_gold = EGroup_CreateIfNotFound('egroup_closest_gold') 
+    --获取野外的全部金矿实体
+    World_GetAllEntitiesOfType(egroup_closest_gold, 'gold')
+    local eg_gold = AGS_EGroup_GetClosestEntity(egroup_closest_gold, Util_GetPosition(sid), nil)
     
     if eg_gold ~= nil then
       EGroup_Single(eg_single, eg_gold)
@@ -143,11 +115,14 @@ function AGS_Empire_War_AssignUnitsToResources(context_data, spawn_table)
   local function _AssignGatherBerry(gid, idx, sid)
     SGroup_Single(sg_single, sid)
     
-    -- 查找周边浆果类型
-    local e_closest_berry = AGS_GetClosestFoodEntity(player_id, 'berry', Util_GetPosition(sid), 15)
+    local egroup_closest_forage_bush = EGroup_CreateIfNotFound('egroup_closest_forage_bush') 
+    
+    World_GetAllEntitiesOfType(egroup_closest_forage_bush, 'forage_bush')
+    -- 查找最近的浆果
+    local eg_forage_bush = AGS_EGroup_GetClosestEntity(egroup_closest_forage_bush, Util_GetPosition(sid), nil)
 
-    if e_closest_berry ~= nil then
-      EGroup_Single(eg_single, e_closest_berry)
+    if eg_forage_bush ~= nil then
+      EGroup_Single(eg_single, eg_forage_bush)
       LocalCommand_SquadEntity(player_id, sg_single, SCMD_Gather, eg_single, false)
     else
       print("Could not find berries to assign villager! 没找到浆果!")  
@@ -176,13 +151,25 @@ function AGS_Empire_War_AssignUnitsToResources(context_data, spawn_table)
     SGroup_Single(sg_single, sid)
     
     -- 查找周边羊类型
-    --gaia_herdable_sheep
-    local sg_sheep = Player_GetSquadsFromType(player_id, 'scar_sheep')
-    local squad_closest_sheep = AGS_EGroup_GetClosestSquad(sg_sheep, Util_GetPosition(sid), nil)
+    -- gaia_herdable_sheep
+    local sgroup_closest_sheep = SGroup_CreateIfNotFound('sgroup_closest_sheep')
     
-    if squad_closest_sheep ~= nil then
-      local sgroup_closest_sheep = SGroup_CreateIfNotFound('sgroup_closest_sheep')
-      SGroup_Add(sgroup_closest_sheep, squad_closest_sheep)
+    distance = 15
+    
+    if player_civ == 'chinese' or player_civ == 'chinese_ha_01' or player_civ == 'mongol' then
+      distance = 70
+    end
+    
+    World_GetSquadsNearPoint(player_id, sgroup_closest_sheep, Util_GetPosition(sid), distance, OT_Player)
+    SGroup_Filter(sgroup_closest_sheep, AGS_GetNeutralUnit(AGS_BP_SHEEP), FILTER_KEEP)
+    
+    --if squad_closest_sheep ~= nil then
+    if SGroup_Count(sgroup_closest_sheep) > 0 then
+      --中国文明已通过其他操作改变农民位置
+      --if player_civ ~= 'chinese' and player_civ ~= 'chinese_ha_01' then
+        --SGroup_WarpToPos(sg_single, SGroup_GetPosition(sgroup_closest_sheep))
+      --end
+      
       LocalCommand_SquadSquad(player_id, sg_single, SCMD_Gather, sgroup_closest_sheep, false)
     else
       print("Could not find sheeps to assign villager! 没找到羊!")  
@@ -193,18 +180,18 @@ function AGS_Empire_War_AssignUnitsToResources(context_data, spawn_table)
   local function _AssignGatherWood(gid, idx, sid)
     SGroup_Single(sg_single, sid)
     
-    local wood_entities = EGroup_CreateIfNotFound(AGS_EGroupNeutralName(1, 'wood'))
+    local closet_wood_entity = EGroup_CreateIfNotFound('closet_wood_entity')
     -- 查找周边木头类型 
-    World_GetEntitiesNearPoint(player_id, wood_entities, Util_GetPosition(sid), 15, OT_Neutral)
-    EGroup_Filter(wood_entities, AGS_BP_TREE, FILTER_KEEP)
-    local closest_wood = AGS_EGroup_GetClosestEntity(wood_entities, Util_GetPosition(sid))
+    World_GetEntitiesNearPoint(player_id, closet_wood_entity, Util_GetPosition(sid), 15, OT_Neutral)
+    EGroup_Filter(closet_wood_entity, AGS_BP_TREE, FILTER_KEEP)
+    local closest_wood = AGS_EGroup_GetClosestEntity(closet_wood_entity, Util_GetPosition(sid), nil)
     
     if closest_wood ~= nil then
       -- 获取最近的树
       EGroup_Single(eg_single, closest_wood)
       LocalCommand_SquadEntity(player_id, sg_single, SCMD_Gather, eg_single, false)
     else
-      print("Could not find berries to assign villager! 没找到浆果!")  
+      print("Could not find tree to assign villager! 没找到可以派遣的树!")  
     end
   end
   
@@ -214,33 +201,69 @@ function AGS_Empire_War_AssignUnitsToResources(context_data, spawn_table)
   local tc_capital = EGroup_GetEntityAt(Player_GetEntitiesFromType(player_id, AGS_BP_TC_CAPITAL), 1)
   local tc_capital_pos = Entity_GetPosition(tc_capital)
   local gather_sheep_farmer_pos =  World_Pos(tc_capital_pos.x - 3.5, 0, tc_capital_pos.z - 6.5)
-  --重设中国文明的采集区
-  --if player_civ == 'chinese' or player_civ == 'chinese_ha_01' then
-    --gather_sheep_pos = Entity_GetPosition(ent_econ_food)
-  --end
-  
-  ---- 重设蒙古文明的采集区
-  --if player_civ == 'mongol' then
-    --local pos = Entity_GetPosition(ent_econ_wood) 
-    --gather_sheep_pos = World_Pos(pos.x - 3.5, 0, pos.z - 7.5)
-  --end
-  
-   -- 都是4农吃羊的文明
-  if player_civ == 'english' or player_civ == 'sultanate' or player_civ == 'abbasid' or player_civ == 'abbasid_ha_01' then
-    local sg_player_econ_sheep_farmer = AGS_SpawnSquad(player_id, 'econ_sheep_farmer', AGS_GetCivilizationUnit(player_civ, 'villager'), gather_sheep_farmer_pos, nil, 4)
+   
+  -- 因为调整了采集效率所以 不需要在吃浆果了 
+  local sg_player_econ_sheep_farmer = nil
+  if player_civ == 'english' then
+    -- 都是4农吃羊的文明
+    --or player_civ == 'sultanate' or player_civ == 'abbasid' or player_civ == 'abbasid_ha_01' 
+    sg_player_econ_sheep_farmer = AGS_SpawnSquad(player_id, 'econ_sheep_farmer', AGS_GetCivilizationUnit(player_civ, 'villager'), gather_sheep_farmer_pos, nil, 4)
     
     if SGroup_Count(sg_player_econ_sheep_farmer) > 0 then
       SGroup_ForEach(sg_player_econ_sheep_farmer, _AssignGatherSheep)
     end
-  else
+  elseif player_civ ~= 'chinese' and player_civ ~= 'chinese_ha_01' then
+    local count = 12
+    if player_civ == 'french' then
+      count = 13
+    end
+    if player_civ == 'hre' then
+      count = 11
+    end
+    if player_civ == 'hre_ha_01' then
+      count = 10
+    end
+    
+    -- 蒙古比较特殊(吃肉和砍树都在城镇中心)
+    if player_civ == 'mongol' then 
+      local ovoo = EGroup_GetEntityAt(Player_GetEntitiesFromType(player_id, "ovoo"), 1)
+      
+      -- 采集点应该是城镇中心向着敖包
+      local gather_sheep_pos_mon = Util_GetPositionFromAtoB( tc_capital_pos, Entity_GetPosition(ovoo), 5)
+      
+      local sg_sheep = Player_GetSquadsFromType(player_id, 'scar_sheep')
+      SGroup_WarpToPos(sg_sheep, gather_sheep_pos_mon)
+      
+      local sg_player_econ_sheep_farmer_mon = AGS_SpawnSquad(player_id, 'econ_sheep_farmer_mon', AGS_GetCivilizationUnit(player_civ, 'villager'), gather_sheep_pos_mon, nil, 11)
+      
+      if SGroup_Count(sg_player_econ_sheep_farmer_mon) > 0 then
+        SGroup_ForEach(sg_player_econ_sheep_farmer_mon, _AssignGatherSheep)
+      end
+      
+      
+      --砍树
+      local sg_player_econ_wood_farmer_mon = AGS_SpawnSquad(player_id, 'econ_wood_farmer_mon', AGS_GetCivilizationUnit(player_civ, 'villager'), tc_capital_pos, nil, 7)
+          
+      if SGroup_Count(sg_player_econ_wood_farmer_mon) > 0 then
+        SGroup_ForEach(sg_player_econ_wood_farmer_mon, _AssignGatherWood)
+      end
+      
+    else
+      sg_player_econ_sheep_farmer = AGS_SpawnSquad(player_id, 'econ_sheep_farmer', AGS_GetCivilizationUnit(player_civ, 'villager'), tc_capital_pos, nil, count)
+      
+      if SGroup_Count(sg_player_econ_sheep_farmer) > 0 then
+        SGroup_ForEach(sg_player_econ_sheep_farmer, _AssignGatherSheep)
+      end
+    end
     
   end
   
+  -- 此处是需要建筑定位的功能
   -- failedPlacements:首都城镇中心表 
   -- spawnSets:其他建筑表
   for _, t_spawn_entities in pairs(spawn_table.spawnSets) do
+    
     if t_spawn_entities.id ~= "town_center_set" then
-      
       -- 生成的除城镇中心外的建筑
       for e_idx, entity in pairs(t_spawn_entities.structureGroups) do
         --local entity_id = entity.entityIDs
@@ -252,7 +275,7 @@ function AGS_Empire_War_AssignUnitsToResources(context_data, spawn_table)
         
         --local player_all_entities = Player_GetAllEntities(player_id)
         
-        --if entity
+        --根据磨坊的调整
         if entity_type == "mill_food" then
           -- 英国农田
           if player_civ == 'english' then
@@ -266,42 +289,121 @@ function AGS_Empire_War_AssignUnitsToResources(context_data, spawn_table)
               SGroup_ForEach(sg_player_econ_food_farmer, _AssignGatherFarm)
             end
             
+          elseif player_civ == 'chinese' or player_civ == 'chinese_ha_01' then
             
+            -- 磨坊 
+            local gristmill = EGroup_GetEntityAt(Player_GetEntitiesFromType(player_id, 'scar_gristmill'), 1)
+            local pos_econ_chi = Entity_GetPosition(gristmill) 
+            local gather_sheep_pos_chi = World_Pos(pos_econ_chi.x - 3.5, 0, pos_econ_chi.z - 5)
             
-          else
+            local sg_sheep = Player_GetSquadsFromType(player_id, 'scar_sheep')
+            SGroup_WarpToPos(sg_sheep, gather_sheep_pos_chi)
+            
+            local sg_player_econ_food_farmer_chi = AGS_SpawnSquad(player_id, 'econ_farm_farmer_chi', AGS_GetCivilizationUnit(player_civ, 'villager'), pos_econ_chi, nil, 11)
+            
+            if SGroup_Count(sg_player_econ_food_farmer_chi) > 0 then
+              SGroup_ForEach(sg_player_econ_food_farmer_chi, _AssignGatherSheep)
+            end
+            
+            -- 命官监督
+            local bp_supervise = BP_GetAbilityBlueprint('official_supervise_building_target_chi')
+            EGroup_Single(eg_single, gristmill) 
+            local official_farm = AGS_SpawnSquad(player_id, 'official_farm', AGS_GetCivilizationUnit(player_civ, 'official'), Entity_GetPosition(gristmill), nil, 1)
+            LocalCommand_SquadEntityAbility(player_id, official_farm, eg_single, bp_supervise, true, false)
+          end
+          
+        end          
+        
+        --根据金矿的调整
+        if entity_type == "mine_gold" then
+          local count_mining_worker = 5
+          if player_civ == 'french' or player_civ == 'french_ha_01' then
+            count_mining_worker = 6
+          elseif player_civ == 'hre' or player_civ == 'hre_ha_01' or player_civ == 'chinese' or player_civ == 'chinese_ha_01' then
+            count_mining_worker = 4
+          end
+          
+          -- 矿场
+          local miningcamp = EGroup_GetEntityAt(Player_GetEntitiesFromType(player_id, 'scar_miningcamp'), 1)
+          
+          local sg_player_econ_gold_farmer = AGS_SpawnSquad(player_id, 'econ_gold_farmer', AGS_GetCivilizationUnit(player_civ, 'villager'), Entity_GetPosition(miningcamp), nil, count_mining_worker)
+          
+          if SGroup_Count(sg_player_econ_gold_farmer) > 0 then
+            SGroup_ForEach(sg_player_econ_gold_farmer, _AssignGoldminer)
+          end
+          
+          -- 中国命官监督
+          if player_civ == 'chinese' or player_civ == 'chinese_ha_01' then
+            local bp_supervise = BP_GetAbilityBlueprint('official_supervise_building_target_chi')
+            EGroup_Single(eg_single, miningcamp) 
+            local official_gold = AGS_SpawnSquad(player_id, 'official_gold', AGS_GetCivilizationUnit(player_civ, 'official'), Entity_GetPosition(miningcamp), nil, 1)
+            LocalCommand_SquadEntityAbility(player_id, official_gold, eg_single, bp_supervise, true, false)
+          end
+          
+          -- 教士
+          if player_civ == 'hre' then
+            AGS_SpawnSquad(player_id, 'monk_gold', AGS_GetCivilizationUnit(player_civ, 'monk'), Entity_GetPosition(miningcamp), nil, 1)
+          end
+          
+        end
+        
+        --根据伐木场的调整
+        if entity_type == "lumber_mill" then
+          local count_wood_worker = 7
+          
+          -- 矿场
+          local lumbercamp = EGroup_GetEntityAt(Player_GetEntitiesFromType(player_id, 'scar_lumbercamp'), 1)
+          
+          local sg_player_econ_wood_farmer = AGS_SpawnSquad(player_id, 'econ_wood_farmer', AGS_GetCivilizationUnit(player_civ, 'villager'), Entity_GetPosition(lumbercamp), nil, count_wood_worker)
+          
+          if SGroup_Count(sg_player_econ_wood_farmer) > 0 then
+            SGroup_ForEach(sg_player_econ_wood_farmer, _AssignGatherWood)
+          end
+        end
+        
+        --mosque
+        if player_civ == "sultanate" then
+          --根据伐木场的调整
+          if entity_type == "mosque" then
+            local mosque = EGroup_GetEntityAt(Player_GetEntitiesFromType(player_id, 'scar_monastery'), 1)
+            
+            local sg_player_monk_sul = AGS_SpawnSquad(player_id, 'monk_sul', AGS_GetCivilizationUnit(player_civ, 'monk'), Entity_GetPosition(mosque), nil, 3)
+            
+           
+            if SGroup_Count(sg_player_monk_sul) > 0 then
+              EGroup_Single(eg_single, mosque)
+              Cmd_Garrison(sg_player_monk_sul, eg_single, false, false, true)  
+            end
+          end
+        end
+        
+        if player_civ == 'mongol' then
+          -- 敖包
+          if entity_type == "ovoo" then
+            
+          end
+          
+          if entity_type == "ger_gold" then
+
+            -- 蒙古包
+            local miningcamp_mon = EGroup_GetEntityAt(Player_GetEntitiesFromType(player_id, 'scar_house'), 1)
+            
+            local sg_player_econ_gold_farmer_mon = AGS_SpawnSquad(player_id, 'econ_gold_farmer_mon', AGS_GetCivilizationUnit(player_civ, 'villager'), Entity_GetPosition(miningcamp_mon), nil, 5)
+            
+            if SGroup_Count(sg_player_econ_gold_farmer_mon) > 0 then
+              SGroup_ForEach(sg_player_econ_gold_farmer_mon, _AssignGoldminer)
+            end
             
           end
           
           
         end
-        --local sg_player_goldminer = AGS_Empire_War_Generate_Sgroup_PreSetting(player_id, player_civ, "econ_gold", 'worker', player_building_position_table['pos_gold_mining_camp'], true)
-        --local sg_player_econ_food_sheep = AGS_Empire_War_Generate_Sgroup_PreSetting(player_id, player_civ, "econ_food_sheep", 'worker', gather_sheep_pos, true)
-        --local sg_player_econ_food_berry = AGS_Empire_War_Generate_Sgroup_PreSetting(player_id, player_civ, "econ_food_berry", 'worker', player_building_position_table['pos_econ_food'], true)
-        --local sg_player_econ_wood = AGS_Empire_War_Generate_Sgroup_PreSetting(player_id, player_civ, "econ_wood", 'worker', player_building_position_table['pos_econ_wood'], true)
-      
-      end
+          
+      end --内循环结尾
     end
-  end
-  
-   ----遍历执行派遣
-  --if sg_player_goldminer ~= nil then 
-  --SGroup_ForEach(sg_player_goldminer, _AssignGoldminer)
-  --end
-  --if sg_player_econ_food_sheep ~= nil then
-  --SGroup_ForEach(sg_player_econ_food_sheep, _AssignGatherSheep)
-  --end
-  --if sg_player_econ_food_berry ~= nil then
-  --SGroup_ForEach(sg_player_econ_food_berry, _AssignGatherBerry)
-  --end
-  --if sg_player_econ_wood ~= nil then
-  --SGroup_ForEach(sg_player_econ_wood, _AssignGatherWood)
-  --end
-  
-  
-   
-
-
-  end
+    
+  end --外循环结尾
+end
 
 function Reinforce_AI_DefaultSettings(context, data)
   if data.player_id == nil then
@@ -309,14 +411,14 @@ function Reinforce_AI_DefaultSettings(context, data)
   end  
 
   AGS_GiveResources_ONCE(data.player_id)
-  Rule_AddOneShot(AGS_AIMadModel, 540, data)
+  Rule_AddOneShot(AGS_AIMadModel, 480, data)
 end
 
 function AGS_AIMadModel(context, data)
   Rule_AddInterval(AGS_GiveResources, 30, data)
 end
 
--- 续命资源
+-- 支援资源
 function AGS_GiveResources(context, data)
   if data.player_id == nil then
     return
@@ -329,8 +431,8 @@ function AGS_GiveResources(context, data)
     Player_AddResource(player_id, RT_Gold, 400)
     Player_AddResource(player_id, RT_Wood, 250)
     Player_AddResource(player_id, RT_Stone, 250)
-    local event_cue_text = Loc_FormatText("$a4536250dfa64a42a9fa6b37d3b36014:84", '')
-    UI_CreateEventCueClickable(-1, 10, -1, 0, event_cue_text, "", "low_priority", "", "sfx_ui_event_queue_low_priority_play", 255, 255, 255, 255, ECV_Queue, nothing)
+
+    UI_CreateEventCueClickable(-1, 10, -1, 0, "$a4536250dfa64a42a9fa6b37d3b36014:84", "", "low_priority", "", "sfx_ui_event_queue_low_priority_play", 255, 255, 255, 255, ECV_Queue, nothing)
   else
     Player_AddResource(player_id, RT_Food, rate*400*2)
     Player_AddResource(player_id, RT_Gold, rate*400*2)
@@ -341,22 +443,32 @@ function AGS_GiveResources(context, data)
 end
 
 function AGS_GiveResources_ONCE(player_id)
-  --local player_id = context.player_id
     -- 根据玩家类型给资源
   if Player_IsHuman(player_id) then
     Player_AddResource(player_id, RT_Food, 350)
     Player_AddResource(player_id, RT_Gold, 200)
     Player_AddResource(player_id, RT_Stone, 1100)
   else
-    Player_AddResource(player_id, RT_Stone, 20000)
+    Player_AddResource(player_id, RT_Stone, 200000)
+  end
+  
+end
+
+function AGS_AddQueueProductionItem_ONCE(context, data)
+  local player_id = data.player_id
+  local player_civ = data.player_civ
+  -- 添加生产队(需要延迟，此时还未在地图上生成)
+  local TC =  EGroup_GetEntityAt(Player_GetEntitiesFromType(player_id, AGS_BP_TC_CAPITAL), 1)
+  if TC then
+    for s = 1, 3 do
+      Entity_QueueProductionItemByPBG( TC, PITEM_Spawn, AGS_GetCivilizationUnit(player_civ, AGS_BP_VILLAGER) )
+    end
   end
 end
 
-
-
-
-
-
+---------------------------------------------------------------------------------------------------
+-- 测试函数:（以下函数皆因某种原因被废弃，暂时不修复，请根据需求参考）
+---------------------------------------------------------------------------------------------------
 --自动识别类型选择建筑蓝图并生成，返回建筑entity
 --player_id 玩家id 必须
 --player_civ 民族名 必须

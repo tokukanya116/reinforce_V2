@@ -524,7 +524,7 @@
 									</DataObject>
 									<!--WinCondition/WinCondition::OptionsUIDescriptor/WinCondition::OptionSectionUIDescriptor/WinCondition::EnumerationOptionUIDescriptor/WinCondition::OptionEnumItemUIDescriptor/-->
 									<DataObject Name="" Type="WinCondition::OptionEnumItemUIDescriptor" Id="17398313058910491449" OwnerId="1920490018079415808">
-										<DataProperty Name="m_key" Type="String" Value="wonder_scale_cost_default"/>
+										<DataProperty Name="m_key" Type="String" Value="wonder_scale_cost_375"/>
 										<DataProperty Name="m_feSummaryName" Type="Object">
 											<DataValue Name="util::ReflectLocString">12490089968515134749</DataValue>
 											<!--WinCondition/WinCondition::OptionsUIDescriptor/WinCondition::OptionSectionUIDescriptor/WinCondition::EnumerationOptionUIDescriptor/WinCondition::OptionEnumItemUIDescriptor/util::ReflectLocString/-->
@@ -687,7 +687,7 @@
 							<DataObject Name="" Type="WinCondition::BooleanOptionUIDescriptor" Id="11815290541589864494" OwnerId="8453704971596543797" Comment="是否以帝国战争开局">
 								<DataProperty Name="#BaseTypes" Type="String" Value="WinCondition::OptionUIDescriptor#0|"/>
 								<DataProperty Name="m_key" Type="String" Value="option_game_setting_empire_war"/>
-								<DataProperty Name="m_defaultValue" Type="Bool" Value="false"/>
+								<DataProperty Name="m_defaultValue" Type="Bool" Value="true"/>
 								<DataProperty Name="m_feSummaryName" Type="Object">
 									<DataValue Name="util::ReflectLocString">7645567305660419910</DataValue>
 									<!--WinCondition/WinCondition::OptionsUIDescriptor/WinCondition::OptionSectionUIDescriptor/WinCondition::BooleanOptionUIDescriptor/util::ReflectLocString/-->

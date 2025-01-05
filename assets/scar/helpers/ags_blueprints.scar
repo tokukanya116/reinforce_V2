@@ -190,6 +190,7 @@ AGS_ENTITY_TABLE = {
     defense_wall_gate = "building_defense_wall_gate_chi",
 
     villager = "unit_villager_1_chi",
+    official = "unit_official_1_chi",
     king = "unit_king_1_chi",
     monk = "unit_monk_3_chi",
   },
@@ -432,7 +433,7 @@ AGS_ENTITY_TABLE = {
     
     villager = "unit_villager_1_sul",
     king = "unit_king_1_sul",
-    monk = "unit_monk_3_sul",
+    monk = "unit_monk_2_sul",
   },
   malian = {
     castle = "building_defense_keep_mal",
@@ -558,9 +559,10 @@ AGS_ENTITY_TABLE = {
     defense_wall_gate = "building_defense_wall_gate_chi_ha_01",
 
     villager = "unit_villager_1_chi_ha_01",
+    official = "unit_official_1_chi_ha_01",
     king = "unit_king_1_chi_ha_01",
-    monk = "unit_monk_3_chi_ha_01",
-    monk_shaolin = "unit_monk_shaolin_3_chi_ha_01"
+    monk = "unit_monk_shaolin_3_chi_ha_01",
+    --monk_shaolin = "unit_monk_shaolin_3_chi_ha_01"
   },
   french_ha_01 = {
    castle = "building_defense_keep_fre_ha_01",
@@ -757,7 +759,6 @@ AGS_ENTITY_TABLE = {
     monk = "unit_monk_3_byz",
   },
 }
-
 
 -- 文明代称
 AGS_CIV_ABBASID = "abbasid"

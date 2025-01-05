@@ -83,3 +83,72 @@
 82,,,,,,275
 83,,,,,,300
 84,,,ags_start_empire_war,,,资源援助已送达
+85,,,ags_surrender_data,,,战斗至最后一刻!
+86,,,ags_annihilation_data,,,"消灭一切,控制地图压制敌人反攻!"
+87,,,ags_elimination_data,,,"建立并坚守防线,等待反攻时机!"
+88,,,ags_diplomacy_ui,,,当前立场
+89,,,ags_diplomacy,,,单位赠予
+90,,,ags_diplomacy,,,将许可范围的单位赠予盟友
+91,,,ags_diplomacy,,,关系
+92,,,ags_surrender_data,,,"战斗至最后一刻"
+93,,,ags_tributes,,,%1PLAYER_NAME% 没有足够的人口数量
+94,,,ags_tributes,,,%1PLAYER_NAME% 已获得单位援助
+95,,,ags_conquest_data,,,您的帝国已被征服
+96,,,ags_conquest_data,,,征服所有敌人
+97,,,ags_conquest_data,,,%1PLAYER_NAME% 被征服
+98,,,ags_conquest_data,,,摧毁地标
+99,,,ags_culture_data,,,城市 %1NAMEORNUMBER%
+100,,,ags_culture_data,,,控制大部分城市
+101,,,ags_culture_data,,,%1PLAYER_NAME%被同化
+102,,,ags_culture_data,,,你正在接近文化胜利
+103,,,ags_culture_data,,,您的团队正在接近文化胜利
+104,,,ags_culture_data,,,敌人正在接近文化胜利
+105,,,ags_culture_data,,,占领城邦
+106,,,ags_culture_data,,,盟友正在占领城邦
+107,,,ags_culture_data,,,敌人正在占领城邦
+108,,,ags_culture_data,,,城邦已被占领
+109,,,ags_culture_data,,,盟友已占领城邦
+110,,,ags_culture_data,,,敌人已占领城邦
+111,,,ags_culture_data,,,敌人已占领城邦
+112,,,ags_culture_data,,,盟友正在争夺城邦
+113,,,ags_culture_data,,,敌人正在争夺城邦
+114,,,ags_culture_data,,,正在解放城邦
+115,,,ags_culture_data,,,盟友正在解放城邦
+116,,,ags_culture_data,,,敌人正在解放城邦
+117,,,ags_culture_data,,,城邦已被解放
+118,,,ags_culture_data,,,盟友已解放城邦
+119,,,ags_culture_data,,,城邦丢失
+120,,,ags_wonder_data,,,%1PLAYER_NAME% 无法守卫世界奇观的荣耀
+121,,,ags_wonder_data,,,保护奇观失败
+122,,,ags_wonder_data,,,建造一座世界奇观
+123,,,ags_regicide_data,,,保护国王失败
+124,,,ags_regicide_data,,,真正的万王之王
+125,,,ags_regicide_data,,,%1PLAYER_NAME% 被暗杀
+126,,,ags_regicide_data,,,国王遭受攻击
+127,,,ags_regicide_data,,,敌人攻击 %1PLAYER_NAME% 的国王
+128,,,ags_diplomacy,,,%1PLAYER_NAME% 变为友好
+129,,,ags_diplomacy,,,友好
+130,,,ags_diplomacy,,,%1PLAYER_NAME% 变为中立
+131,,,ags_diplomacy,,,中立
+132,,,ags_diplomacy,,,敌对
+133,,,ags_diplomacy,,,%1PLAYER_NAME% 变为敌对
+134,,,ags_diplomacy,,,将选中单位赠予盟友
+135,,,ags_diplomacy,,,单位赠予
+136,,,ags_religious_data,,,%1PLAYER_NAME% 供奉新的神祗
+137,,,ags_team_solidarity_data,,,保护您的队友
+138,,,ags_team_solidarity_data,,,未能保护 %1PLAYER_NAME%
+139,,,ags_team_solidarity_data,,,所有其他队员都溃不成军
+140,,,ags_score_data,,,征服所有敌人
+141,,,ags_score_data,,,存活并超越所有人，当前排名 %1RANK_POSITION%
+142,,,ags_score_data,,,您的帝国被遗忘在历史尘埃中
+143,,,ags_score_data,,,您的帝国被永远铭记于历史中
+144,,,ags_score_data,,,%1PLAYER_NAME% 仍在等待戈多
+145,,,ags_score_data,,,剩余 %1MINUTES_REMAINING% 分钟游戏结束
+146,,,,,,剩余 1 分钟游戏结束
+147,,,ags_team_solidarity_data,,,%1PLAYER_NAME% 和团队同生共死，选择投降
+148,,,ags_treaty_data,,,为战争做好准备
+149,,,ags_treaty_data,,,条约结束，准备好血流成河吧！
+150,,,ags_treaty_data,,,这是不应该发生的
+151,,,ags_treaty_data,,,笔墨的确是史上最强大的武器
+152,,,ags_treaty_data,,,剩余 %1MINUTES_REMAINING% 分钟条约结束
+153,,,ags_treaty_data,,,距离条约结束还有 1 分钟

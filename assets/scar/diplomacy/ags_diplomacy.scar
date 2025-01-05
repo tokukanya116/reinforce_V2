@@ -227,10 +227,10 @@ function AGS_Diplomacy_Create(relations)
 			players = {},
 			increment = 100,						-- Amount by which one button click increments/decrements tribute
 			IsMultiPage = false,
-			headerRelations = Loc_FormatText("$64c5019a145c4e4da448dbd3adeea61e:234"),
+			headerRelations = Loc_FormatText("$a4536250dfa64a42a9fa6b37d3b36014:91"),
       -- 单位赠予标题
-      unitGift = Loc_FormatText("$64c5019a145c4e4da448dbd3adeea61e:419"),
-      unitGiftFormatter = Loc_FormatText("$64c5019a145c4e4da448dbd3adeea61e:420"),
+      unitGift = Loc_FormatText("$a4536250dfa64a42a9fa6b37d3b36014:89"),
+      unitGiftFormatter = Loc_FormatText("$a4536250dfa64a42a9fa6b37d3b36014:90"),
 		},
 		cue = {							-- Event cue template (shown when player changes relationship or receives tribute) 
 			lifetime = 10.0,
@@ -268,13 +268,13 @@ function AGS_Diplomacy_Create(relations)
 			{ resource_type = RT_Stone,image = "pack://application:,,,/WPFGUI;component/icons/resources/resource_stone_icon.png", help = 11164970},
 		},
 		relations = {
-			{ relation_type = R_ALLY, image = "pack://application:,,,/WPFGUI;component/icons/common/orders/rally.png", help = "$64c5019a145c4e4da448dbd3adeea61e:239", title = "$64c5019a145c4e4da448dbd3adeea61e:235" },
-			{ relation_type = R_NEUTRAL, image = "pack://application:,,,/WPFGUI;component/icons/races/common/buildings/market.png", help = "$64c5019a145c4e4da448dbd3adeea61e:240", title = "$64c5019a145c4e4da448dbd3adeea61e:236" },
-			{ relation_type = R_ENEMY, image = "pack://application:,,,/WPFGUI;component/icons/races/common/buildings/barracks.png", help = "$64c5019a145c4e4da448dbd3adeea61e:241", title = "$64c5019a145c4e4da448dbd3adeea61e:237" },
+			{ relation_type = R_ALLY, image = "pack://application:,,,/WPFGUI;component/icons/common/orders/rally.png", help = "$a4536250dfa64a42a9fa6b37d3b36014:128", title = "$a4536250dfa64a42a9fa6b37d3b36014:129" },
+			{ relation_type = R_NEUTRAL, image = "pack://application:,,,/WPFGUI;component/icons/races/common/buildings/market.png", help = "$a4536250dfa64a42a9fa6b37d3b36014:130", title = "$a4536250dfa64a42a9fa6b37d3b36014:131" },
+			{ relation_type = R_ENEMY, image = "pack://application:,,,/WPFGUI;component/icons/races/common/buildings/barracks.png", help = "$a4536250dfa64a42a9fa6b37d3b36014:133", title = "$a4536250dfa64a42a9fa6b37d3b36014:132" },
 		},
     -- 单位赠予悬停提示
     unitgift = {
-      { unitgift_type = UGT_Normal, image = "pack://application:,,,/WPFGUI;component/icons/races/common/buildings/market.png", help = "$64c5019a145c4e4da448dbd3adeea61e:421", title = "$64c5019a145c4e4da448dbd3adeea61e:420" },
+      { unitgift_type = UGT_Normal, image = "pack://application:,,,/WPFGUI;component/icons/races/common/buildings/market.png", help = "$a4536250dfa64a42a9fa6b37d3b36014:134", title = "$a4536250dfa64a42a9fa6b37d3b36014:135" },
     },
 		age = {						-- Loc_string lookup table (indexed by age)
 			Loc_GetString(11180928),					-- I

@@ -957,7 +957,7 @@ function Diplomacy_CreateDataContext()
       is_diplomacy_visible = not player.isLocal,			
       is_tribute_enabled = _diplomacy.tribute.is_enabled and _diplomacy.tribute.is_market_built,-- and not player.isLocal,
       relationTooltip = Diplomacy_RelationToTooltipConverter(player_local, player),
-      relationToolTipHeader = Loc_FormatText("$64c5019a145c4e4da448dbd3adeea61e:238"),
+      relationToolTipHeader = Loc_FormatText("$a4536250dfa64a42a9fa6b37d3b36014:88"),
       is_ally = Player_ObserveRelationship(player.id, player_local.id) == R_ALLY,
       is_neutral = Player_ObserveRelationship(player.id, player_local.id) == R_NEUTRAL,
       is_enemy = Player_ObserveRelationship(player.id, player_local.id) == R_ENEMY,

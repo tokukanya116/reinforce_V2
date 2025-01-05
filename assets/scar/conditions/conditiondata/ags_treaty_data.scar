@@ -10,13 +10,13 @@
 AGS_OBJECTIVES_TREATY = {
 	reason = AGS_WR_TREATY,
 	-- "Prepare for the war."
-	title = "$64c5019a145c4e4da448dbd3adeea61e:307", 
+	title = "$a4536250dfa64a42a9fa6b37d3b36014:148", 
 	-- "Treaty is over, prepare for bloodshed.
-	title_over = "$64c5019a145c4e4da448dbd3adeea61e:233",
+	title_over = "$a4536250dfa64a42a9fa6b37d3b36014:149",
 	-- "This was not supposed to happen.
-	title_lost = "$64c5019a145c4e4da448dbd3adeea61e:308",
+	title_lost = "$a4536250dfa64a42a9fa6b37d3b36014:150",
 	-- "Pen is truly strongest weapon in history."
-	title_victory = "$64c5019a145c4e4da448dbd3adeea61e:309",
+	title_victory = "$a4536250dfa64a42a9fa6b37d3b36014:151",
 	description = Loc_Empty(),
 	icon = "icons\\objectives\\objectives_capture",
 	data_template = DT_PRIMARY_DEFAULT,
@@ -29,9 +29,9 @@ AGS_OBJECTIVES_TREATY = {
 
 AGS_NOTIFICATIONS_TREATY_COUNTDOWN = {
 	-- "%1MINUTES_REMAINING% minutes until Treaty Ends"
-	title_victory = "$64c5019a145c4e4da448dbd3adeea61e:232",
-	title_defeat = "$64c5019a145c4e4da448dbd3adeea61e:232",
+	title_victory = "$a4536250dfa64a42a9fa6b37d3b36014:152",
+	title_defeat = "$a4536250dfa64a42a9fa6b37d3b36014:152",
 	-- "1 minute until Treaty Ends"
-	title_final_victory = "$64c5019a145c4e4da448dbd3adeea61e:306",
-	title_final_defeat = "$64c5019a145c4e4da448dbd3adeea61e:306",	
+	title_final_victory = "$a4536250dfa64a42a9fa6b37d3b36014:153",
+	title_final_defeat = "$a4536250dfa64a42a9fa6b37d3b36014:153",	
 }

@@ -10,7 +10,7 @@
 AGS_OBJECTIVES_ELIMINATION = {
 	reason = AGS_WR_ELIMINATION,
 	-- "Prevail until the end."
-	title = "$64c5019a145c4e4da448dbd3adeea61e:253", 
+	title = "$a4536250dfa64a42a9fa6b37d3b36014:87", 
 	description = Loc_Empty(),
 	icon = "icons\\objectives\\objectives_generic",
 	data_template = DT_PRIMARY_DEFAULT,

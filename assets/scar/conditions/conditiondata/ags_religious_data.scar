@@ -37,7 +37,7 @@ AGS_OBJECTIVES_RELIGIOUS = {
 
 AGS_NOTIFICATIONS_RELIGIOUS = {
 	-- "%1PLAYER_NAME% bowed down before new god"
-	title = "$64c5019a145c4e4da448dbd3adeea61e:313",
+	title = "$a4536250dfa64a42a9fa6b37d3b36014:136",
 	sfx = nil,	
 }
 

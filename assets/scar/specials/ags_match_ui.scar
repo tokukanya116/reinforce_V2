@@ -8,7 +8,7 @@
 ---------------------------------------------------------------------------------------------------
 
 AGS_MATCH_UI_MODULE = "AGS_MatchUI"
-AGS_MATCH_UI_OBJECTIVE_VISIBILITY = true
+AGS_MATCH_UI_OBJECTIVE_VISIBILITY = false
 AGS_MATCH_UI_CONTEXT = {
 	ui = "AGS_MatchUI",
 	is_ui_created = false,
@@ -52,7 +52,7 @@ end
 
 function AGS_MatchUI_EarlyInitializations()
 	AGS_Print("AGS_MatchUI_EarlyInitializations")
-	AGS_MatchUI_CreateDataContext()
+	--AGS_MatchUI_CreateDataContext()
 end
 
 function AGS_MatchUI_OnPlay()	

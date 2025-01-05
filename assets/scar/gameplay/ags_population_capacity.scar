@@ -39,10 +39,19 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function AGS_PopulationCapacity_Change()
-	for _, player in pairs(PLAYERS) do		
-		AGS_PopulationCapacity_ApplyMaxCapPopulation(player, AGS_GLOBAL_SETTINGS.MaximumPopulation)
-		AGS_PopulationCapacity_SetMinPopulation(player, AGS_GLOBAL_SETTINGS.MinimumPopulation) 
-	end
+  for _, player in pairs(PLAYERS) do    
+
+    local player_civ = Player_GetRaceName(player.id)
+    
+    -- 根据玩家类型设人口
+    if Player_IsHuman(player.id) == true then
+      AGS_PopulationCapacity_ApplyMaxCapPopulation(player, AGS_GLOBAL_SETTINGS.MaximumPopulation)
+    else
+      AGS_PopulationCapacity_ApplyMaxCapPopulation(player, AGS_GLOBAL_SETTINGS.MaximumPopulation + 40)
+    end  
+    
+    AGS_PopulationCapacity_SetMinPopulation(player, AGS_GLOBAL_SETTINGS.MinimumPopulation) 
+  end
 end
 
 function AGS_PopulationCapacity_SetMinPopulation(player, pop_size)

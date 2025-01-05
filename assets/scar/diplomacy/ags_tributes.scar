@@ -97,14 +97,14 @@ function Diplomacy_UnitGiftNtw(playerID, data)
         if Squad_GetID(sid) == tonumber(squadIdTable[i]) then
           Squad_SetPlayerOwner(sid, receiver.id)
           
-          local text = Loc_FormatText("$64c5019a145c4e4da448dbd3adeea61e:423", Player_GetDisplayName(receiver.id))    -- "%1PLAYER_NAME% has received unit assistance"
+          local text = Loc_FormatText("$a4536250dfa64a42a9fa6b37d3b36014:94", Player_GetDisplayName(receiver.id))    -- "%1PLAYER_NAME% has received unit assistance"
           UI_CreateEventCueClickable(-1, cue.lifetime, 0, cue.repeatTime, text, cue.desc, cue.template, cue.icon, cue.sfx, cue.color.r, cue.color.g, cue.color.b, cue.color.a, cue.style, nothing)
           
         end
       end
       SGroup_ForEach(sg_all_squad, getSquadById)
     else
-      local text = Loc_FormatText("$64c5019a145c4e4da448dbd3adeea61e:424", Player_GetDisplayName(receiver.id))    -- "%1AMOUNT% food received from %2PLAYER_NAME%"
+      local text = Loc_FormatText("$a4536250dfa64a42a9fa6b37d3b36014:93", Player_GetDisplayName(receiver.id))    -- %1PLAYER_NAME% 没有足够的人口数量
       UI_CreateEventCueClickable(-1, cue.lifetime, 0, cue.repeatTime, text, cue.desc, cue.template, cue.icon, cue.sfx, cue.color.r, cue.color.g, cue.color.b, cue.color.a, cue.style, nothing)
     end
         
