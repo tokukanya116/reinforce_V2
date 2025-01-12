@@ -44,10 +44,10 @@ function AGS_PopulationCapacity_Change()
     local player_civ = Player_GetRaceName(player.id)
     
     -- 根据玩家类型设人口
-    if Player_IsHuman(player.id) == true then
+    if Player_IsHuman(player.id) then
       AGS_PopulationCapacity_ApplyMaxCapPopulation(player, AGS_GLOBAL_SETTINGS.MaximumPopulation)
     else
-      AGS_PopulationCapacity_ApplyMaxCapPopulation(player, AGS_GLOBAL_SETTINGS.MaximumPopulation + 40)
+      AGS_PopulationCapacity_ApplyMaxCapPopulation(player, AGS_GLOBAL_SETTINGS.MaximumPopulation + 50)
     end  
     
     AGS_PopulationCapacity_SetMinPopulation(player, AGS_GLOBAL_SETTINGS.MinimumPopulation) 

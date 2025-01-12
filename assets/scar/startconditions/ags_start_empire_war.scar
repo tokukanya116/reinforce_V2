@@ -54,7 +54,7 @@ function AGS_Empire_War_Start_Setting()
     end
     
     --Rule_AddOneShot( LuaFunction rule, Real OPT_delay, Table OPT_data, EGroupID OPT_group )
-    Rule_AddOneShot(Reinforce_AI_DefaultSettings, 5, ew_content)
+    Rule_AddOneShot(Reinforce_AI_DefaultSettings, 4, ew_content)
     Rule_AddOneShot(AGS_AddQueueProductionItem_ONCE, 2, ew_content)
   end
 end

@@ -130,7 +130,7 @@ AGS_GLOBAL_SETTINGS = {
   Tributes = true,
   Relations = false,
   TeamVision = AGS_GS_TEAM_VISION_ALWAYS,
-  MapVision = AGS_GS_MAP_VISION_CONCEALED,
+  MapVision = AGS_GS_MAP_VISION_EXPLORED,
   
   StartingAge = AGS_GS_AGE_DARK,
   EndingAge = AGS_GS_AGE_LATE_IMPERIAL,
