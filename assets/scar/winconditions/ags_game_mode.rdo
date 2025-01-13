@@ -10,12 +10,12 @@
 			</DataObject>
 		</DataProperty>
 		<DataProperty Name="m_gameModeType" Type="String" Value=""/>
-		<DataProperty Name="m_scarWinConditionFile" Type="String" Value="gamemodes\ags_standard"/>
+		<DataProperty Name="m_scarWinConditionFile" Type="String" Value="gamemodes\ags_standard _test"/>
 		<DataProperty Name="m_feAllowSelectingStartingLocations" Type="Bool" Value="true"/>
 		<DataProperty Name="m_playerUpgrades" Type="Object"/>
-		<DataProperty Name="m_feIcon" Type="String" Value="images\illustrations\create_game\game_mode_empire_wars_selected"/>
+		<DataProperty Name="m_feIcon" Type="String" Value="images\illustrations\create_game\game_mode_custom_selected"/>
 		<DataProperty Name="m_scarMissionFile" Type="String" Value=""/>
-		<DataProperty Name="m_feImageSelected" Type="String" Value="images\illustrations\create_game\game_mode_empire_wars_selected"/>
+		<DataProperty Name="m_feImageSelected" Type="String" Value="images\illustrations\create_game\game_mode_custom_selected"/>
 		<DataProperty Name="m_feDescriptionTooltip" Type="Object">
 			<DataValue Name="util::ReflectLocString">16832707977037878265</DataValue>
 			<!--WinCondition/util::ReflectLocString/-->
@@ -379,7 +379,7 @@
 									</DataObject>
 									<!--WinCondition/WinCondition::OptionsUIDescriptor/WinCondition::OptionSectionUIDescriptor/WinCondition::EnumerationOptionUIDescriptor/WinCondition::OptionEnumItemUIDescriptor/-->
 									<DataObject Name="" Type="WinCondition::OptionEnumItemUIDescriptor" Id="16252920439946487901" OwnerId="7918966087878663125">
-										<DataProperty Name="m_key" Type="String" Value="wonder_scale_cost_default"/>
+										<DataProperty Name="m_key" Type="String" Value="wonder_scale_cost_0"/>
 										<DataProperty Name="m_feSummaryName" Type="Object">
 											<DataValue Name="util::ReflectLocString">4929500632577627734</DataValue>
 											<!--WinCondition/WinCondition::OptionsUIDescriptor/WinCondition::OptionSectionUIDescriptor/WinCondition::EnumerationOptionUIDescriptor/WinCondition::OptionEnumItemUIDescriptor/util::ReflectLocString/-->
@@ -1304,7 +1304,7 @@
 		<DataProperty Name="m_permittedInventoryItemCategories" Type="String">
 			<DataValue>IIT_PlayerCosmetic</DataValue>
 		</DataProperty>
-		<DataProperty Name="m_feImageUnselected" Type="String" Value="images\illustrations\create_game\game_mode_empire_wars_unselected"/>
+		<DataProperty Name="m_feImageUnselected" Type="String" Value="images\illustrations\create_game\game_mode_custom_unselected"/>
 	</DataObject>
 </DataWarehouse>
 

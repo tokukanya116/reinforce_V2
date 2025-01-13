@@ -9,7 +9,7 @@
 -- Everything else is imported and done as part of "ags_cardinal.scar"
 ---------------------------------------------------------------------------------------------------
 
-import("cardinals/ags_cardinal.scar")
+import("cardinals/ags_cardinal_test.scar")
 
 ---------------------------------------------------------------------------------------------------
 -- Delegates:

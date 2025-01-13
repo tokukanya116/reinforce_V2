@@ -34,8 +34,8 @@ end
 function AGS_MapVision_RevealMap()
 	if AGS_GLOBAL_SETTINGS.MapVision == AGS_GS_MAP_VISION_CONCEALED then --隐藏
 		return
-	elseif AGS_GLOBAL_SETTINGS.MapVision == AGS_GS_MAP_VISION_EXPLORED then --已探索
-		FOW_ExploreAll()
+	elseif AGS_GLOBAL_SETTINGS.MapVision == AGS_GS_MAP_VISION_EXPLORED then --已探索(会报错)
+		--FOW_ExploreAll()
 	elseif AGS_GLOBAL_SETTINGS.MapVision == AGS_GS_MAP_VISION_REVEALED then--全开
 		FOW_ForceRevealAllUnblockedAreas()
 	end

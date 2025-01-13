@@ -24,6 +24,12 @@ AGS_WONDER_SCALE_COST_RESOURCE_COUNT = {
 	sultanate = { total = 4, food = 1, wood = 1, gold = 1, stone = 1},
 	malian = { total = 4, food = 1, wood = 1, gold = 1, stone = 1},
 	ottoman = { total = 4, food = 1, wood = 1, gold = 1, stone = 1},
+  abbasid_ha_01 = { total = 4, food = 1, wood = 1, gold = 1, stone = 1},
+  chinese_ha_01 = { total = 4, food = 1, wood = 1, gold = 1, stone = 1},
+  french_ha_01 = { total = 4, food = 1, wood = 1, gold = 1, stone = 1},
+  hre_ha_01 = { total = 4, food = 1, wood = 1, gold = 1, stone = 1},
+  byzantine = { total = 4, food = 1, wood = 1, gold = 1, stone = 1},
+  japanese = { total = 4, food = 1, wood = 1, gold = 1, stone = 1},
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -49,7 +55,7 @@ end
 
 function AGS_WonderScaleCost_CalculateCost(player, player_count)
 	local civ_wonder_type = AGS_WONDER_SCALE_COST_RESOURCE_COUNT[player.raceName]
-	-- This will calculate inflation value for single player.
+	-- This will calculate inflation value for single player. 
 	local one_player_inflation = AGS_WONDER_SCALE_COST_RESOURCES_COUNT * AGS_GLOBAL_SETTINGS.WonderSettings.ScaleCost
 	-- Each player adds this inflation value
 	local total_cost = AGS_WONDER_SCALE_COST_RESOURCES_TOTAL + one_player_inflation * player_count
@@ -63,17 +69,44 @@ function AGS_WonderScaleCost_CalculateCost(player, player_count)
 	}
 end
 
+-- 通过取出所有奇观类型
+-- 遍历蓝图表对照奇观原型ID改变参数
 function AGS_WonderScaleCost_ApplyGameRates(bps)
 	for _, ebp in pairs(bps) do 
 		if AGS_WONDER_SCALE_COST_MODIFIERS[ebp.PropertyBagGroupID] == nil then
 			AGS_WONDER_SCALE_COST_MODIFIERS[ebp.PropertyBagGroupID] = true
-			for _, player in pairs(PLAYERS) do	
-				local cost_change = AGS_WonderScaleCost_CalculateCost(player, #PLAYERS)
-				AGS_WonderScaleCost_ApplyModifier(player.id, ebp, "resource_entity_cost_food", cost_change[1])
-				AGS_WonderScaleCost_ApplyModifier(player.id, ebp, "resource_entity_cost_wood", cost_change[2])
-				AGS_WonderScaleCost_ApplyModifier(player.id, ebp, "resource_entity_cost_gold", cost_change[3])
-				AGS_WonderScaleCost_ApplyModifier(player.id, ebp, "resource_entity_cost_stone", cost_change[4])
-			end
+      for _, player in pairs(PLAYERS) do	
+        local cost_change = {
+          1.6,
+          1.6,
+          1.6,
+          1.6
+        }
+        
+        if player.raceName == AGS_CIV_MONGOL then
+          cost_change = {
+            1.6,
+            1.6,
+            1.6,
+            0
+          }
+        end
+        
+        AGS_WonderScaleCost_ApplyModifier_Default(player.id, ebp, "resource_entity_cost_food", cost_change[1])
+        AGS_WonderScaleCost_ApplyModifier_Default(player.id, ebp, "resource_entity_cost_wood", cost_change[2])
+        AGS_WonderScaleCost_ApplyModifier_Default(player.id, ebp, "resource_entity_cost_gold", cost_change[3])
+        AGS_WonderScaleCost_ApplyModifier_Default(player.id, ebp, "resource_entity_cost_stone", cost_change[4])
+
+        -- 如果不是默认，在新版数值基础上再修改
+        if not (AGS_GLOBAL_SETTINGS.WonderSettings.ScaleCost == 0) then
+          cost_change = AGS_WonderScaleCost_CalculateCost(player, #PLAYERS)
+          AGS_WonderScaleCost_ApplyModifier(player.id, ebp, "resource_entity_cost_food", cost_change[1])
+          AGS_WonderScaleCost_ApplyModifier(player.id, ebp, "resource_entity_cost_wood", cost_change[2])
+          AGS_WonderScaleCost_ApplyModifier(player.id, ebp, "resource_entity_cost_gold", cost_change[3])
+          AGS_WonderScaleCost_ApplyModifier(player.id, ebp, "resource_entity_cost_stone", cost_change[4])
+        end
+        
+      end
 		end
 	end
 end
@@ -82,3 +115,8 @@ end
 function AGS_WonderScaleCost_ApplyModifier(player_id, modifier_ebp, modifier_type, modifier_value)
 	Modifier_ApplyToPlayer(Modifier_Create(MAT_EntityType, modifier_type, MUT_Addition, false, modifier_value, modifier_ebp), player_id, 0.0)
 end	
+--MUT_MultiplicationAddition
+
+function AGS_WonderScaleCost_ApplyModifier_Default(player_id, modifier_ebp, modifier_type, modifier_value)
+  Modifier_ApplyToPlayer(Modifier_Create(MAT_EntityType, modifier_type, MUT_Multiplication, false, modifier_value, modifier_ebp), player_id, 0.0)
+end  
